@@ -2,7 +2,7 @@ const { test, expect } = require('@playwright/test');
 
 test.setTimeout(120000);
 
-test('Tenant Onboarding - Select Property and Unit', async ({ page }) => {
+test('Tenant Onboarding - Full Flow', async ({ page }) => {
 
   // =========================
   // Login
@@ -47,26 +47,47 @@ test('Tenant Onboarding - Select Property and Unit', async ({ page }) => {
   // =========================
   // Select Property
   // =========================
-  await page.getByText('Marvel', { exact: false }).click();
+  await page.getByText('Thousand Oaks', { exact: false }).click();
   await page.waitForTimeout(4000);
 
   // =========================
   // Select Unit
   // =========================
-  await page.getByText('Ax1', { exact: false }).click();
+  await page.getByText('CX2', { exact: false }).click();
   await page.waitForTimeout(3000);
 
-  // OR click Assign Property button
+  // =========================
+  // Assign Property
+  // =========================
   await page.locator('button:has-text("Assign Property")').click();
+  await page.waitForTimeout(3000);
+
+  // =========================
+  // Fill Tenant Details
+  // =========================
+  await page.fill('input[placeholder="First Name"]', 'Yashika');
+  await page.fill('input[placeholder="Last Name"]', 'Y');
+  await page.fill('input[placeholder="Email"]', 'meenakshivalarmathi+4@gmail.com');
+
+  // Phone Number
+  await page.locator('input').nth(3).fill('+15551114323');
+
+  await page.waitForTimeout(2000);
+
+  // =========================
+  // Submit
+  // =========================
+  await page.locator('button:has-text("Submit")').click();
+  await page.waitForTimeout(5000);
 
   // =========================
   // Screenshot
   // =========================
   await page.screenshot({
-    path: 'SelectedUnit.png',
+    path: 'TenantSubmitted.png',
     fullPage: true
   });
 
-  console.log('Property and Unit selected successfully');
+  console.log('Tenant onboarding submitted successfully');
 
 });

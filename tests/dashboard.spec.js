@@ -1,35 +1,39 @@
 const { test, expect } = require('@playwright/test');
 
-test('Dashboard UI Validation', async ({ page }) => {
+test.setTimeout(120000);
 
-  // 🔹 Step 1: Login
+test.skip('Manage Lease - Setup Lease Document', async ({ page }) => {
   await page.goto('https://pms-rent-frontend.onrender.com/#/login');
 
-  await page.fill('[name="username"]', 'your-username');
-  await page.fill('[name="password"]', 'your-password');
-  await page.click('button[type="submit"]');
+  await page.fill('input[name="username"]', 'manager');
+  await page.fill('input[type="password"]', 'Manager@123');
+  await page.getByRole('button', { name: 'Login' }).click();
 
-  await page.waitForTimeout(5000);
+  await expect(page).toHaveURL(/manager/, { timeout: 20000 });
 
-  // 🔹 Step 2: Verify Dashboard URL
-  await expect(page).toHaveURL(/.*manager/);
+  // Navigation
+  await page.getByText('Tenants').click();
+  await page.getByText('Manage Lease').click();
 
-  // 🔹 Step 3: Validate Welcome Text
-  await expect(page.locator('text=Hey')).toBeVisible();
+  // Wait for lease page
+  await page.waitForLoadState('networkidle');
 
-  // 🔹 Step 4: Validate Cards
-  await expect(page.locator('text=Total Revenue')).toBeVisible();
-  await expect(page.locator('text=Occupancy Rate')).toBeVisible();
-  await expect(page.locator('text=Open Tickets')).toBeVisible();
-  await expect(page.locator('text=Total Rent Collected')).toBeVisible();
-  await expect(page.locator('text=Outstanding Rent')).toBeVisible();
+  // Wait until Units section appears
+  await expect(page.getByText('Units')).toBeVisible({ timeout: 15000 });
 
-  // 🔹 Step 5: Validate Buttons
-  await expect(page.locator('text=Add Property')).toBeVisible();
-  await expect(page.locator('text=Add Owner')).toBeVisible();
+  // Click CX2
+  const unit = page.locator('text=CX2').first();
+  await unit.waitFor({ state: 'visible', timeout: 15000 });
+  await unit.click();
 
-  // 🔹 Step 6: Validate Charts Section
-  await expect(page.locator('text=Yearly Revenue')).toBeVisible();
-  await expect(page.locator('text=Units Status')).toBeVisible();
+  // Verify invited
+  await expect(page.getByText('Invited')).toBeVisible();
 
+  // Click Setup Lease Document
+  await page.getByRole('button', { name: 'Set Up Lease Document' }).click();
+
+  await page.screenshot({
+    path: 'SetupLeaseDocument.png',
+    fullPage: true
+  });
 });

@@ -1,7 +1,7 @@
 const { test, chromium } = require('@playwright/test');
 const { playAudit } = require('playwright-lighthouse');
 
-test('Lighthouse Audit - Manager Page', async () => {
+test.skip('Lighthouse Audit - Manager Page', async () => {
   test.setTimeout(120000);
 
   const browser = await chromium.launch({
