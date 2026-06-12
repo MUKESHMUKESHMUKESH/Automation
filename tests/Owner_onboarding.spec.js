@@ -2,7 +2,7 @@
 const { test, expect } = require('@playwright/test');
 const ownerdata = require('../testdata/ownerdata');
 
-const owner = ownerdata[11];
+const owner = ownerdata[13];
 const path = require('path');
 
 test.setTimeout(60000);
@@ -69,11 +69,14 @@ await page.waitForTimeout(1000);
 // Select first dropdown value
 await page.locator('[role="option"]').first().click();
 
-// Take screenshot after owner is added
+console.log('Taking screenshot...');
+
 await page.screenshot({
   path: 'screenshots/owner-added.png',
   fullPage: true
 });
+
+console.log('Screenshot saved');
 
 });
 

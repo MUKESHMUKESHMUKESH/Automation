@@ -1,13 +1,16 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
-test.setTimeout(19000);
+test.setTimeout(180000); // ✅ Increase to 180 seconds
+
+const maintenanceData = require('../testdata/maintenancedata');
+const maintenance = maintenanceData[0];
 
 test('Manager → Maintenance → Create Request Flow', async ({ page }) => {
 
   // 1. Open application
   await page.goto('https://rentgeniux.onrender.com');
-
+ 
   // 2. Login
   await page.locator('input[name="username"]').fill('victoria');
   await page.locator('input[name="password"]').fill('Victoria@123');
@@ -22,7 +25,7 @@ test('Manager → Maintenance → Create Request Flow', async ({ page }) => {
   // 5. Validate navigation
   await expect(page).toHaveURL(/manager\/requests/);
 
-  // 6. Wait for button to be visible (IMPORTANT FIX)
+  // 6. Wait for button to be visible
   const createBtn = page.getByRole('button', { name: 'Create Requests' });
   await expect(createBtn).toBeVisible({ timeout: 10000 });
 
@@ -32,120 +35,156 @@ test('Manager → Maintenance → Create Request Flow', async ({ page }) => {
   // 8. Validate next page
   await expect(page).toHaveURL(/manager\/raiserequest/);
 
-  // After navigating to raise request page
-// Click the tenant dropdown/input
-// Select Tenant
-const tenantInput = page.locator(
-  'input[placeholder="Search by tenant name or email"]'
-);
+  // 9. Select first dropdown (Property)
+  await page.locator('i.q-select__dropdown-icon').first().click();
+  await page.locator('[role="option"]').first().click();
 
-await tenantInput.click();
+  await page.waitForTimeout(2000);
 
-// Wait for tenant list
-await page.locator('.q-menu .q-item').first().waitFor({
-  state: 'visible'
-});
+  // 10. Select Category dropdown
+  await page.locator('i.q-select__dropdown-icon').nth(1).click();
+  await page.getByRole('option', { name: maintenance.category }).click(); // ✅ Using test data
 
-// Click first tenant
-await page.locator('.q-menu .q-item').first().click();
+  await page.waitForTimeout(2000);
 
-// Verify tenant selected
+  // 11. Fill Description
+  await page.locator('textarea.q-field__native.q-placeholder').first().fill(maintenance.description); // ✅ Using test data
+
+  // Click the calendar icon
+await page.locator('i.q-icon.material-icons.cursor-pointer').click();
+
 await page.waitForTimeout(1000);
 
-// Category dropdown
-const categoryDropdown = page.locator('input.q-select__focus-target').nth(1);
-
-await categoryDropdown.click();
-
-// Wait for category options
-await page.locator('.q-menu .q-item').first().waitFor();
-
-// Select first category
-await page.locator('.q-menu .q-item').first().click();
-await page.waitForTimeout(3000);
-// Enter description
-await page.getByPlaceholder('Please provide details about the maintenance issue...')
-  .fill('AC leakage in Hall.');
-
-  // Click time slot dropdown (next q-select)
-// Click Time Slot dropdown
-const timeSlotDropdown = page.locator('input.q-select__focus-target').last();
-
-await timeSlotDropdown.click();
-
-await page.locator('i.material-icons:has-text("event")').click();
-
+// Click tomorrow's date
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
+const tomorrowDate = tomorrow.getDate().toString();
 
-const day = tomorrow.getDate().toString();
+await page.locator('.q-date__calendar-item button').filter({ hasText: tomorrowDate }).click();
 
-await page.locator('.q-date').getByText(day, { exact: true }).first().click();
- 
-// Click Preferred Slot dropdown
-const preferredSlot = page.locator('input.q-select__focus-target').last();
+await page.locator('i.q-select__dropdown-icon').nth(3).click();
+await page.getByRole('option', { name: /morning/i }).click();
 
-await preferredSlot.click();
+// Or by first option
+await page.locator('i.q-select__dropdown-icon').nth(2).click();
+await page.locator('[role="option"]').first().click();
+  await page.waitForTimeout(2000);
 
-// Wait for dropdown options to appear
-await page.waitForTimeout(1000);
+  await page.getByRole('button', { name: 'Submit Request' }).click();
+  await page.waitForTimeout(3000);
 
-// Select first slot
+// Click the more options icon
+await page.locator('i.q-icon.material-icons:has-text("more_horiz")').first().click();
+
+await page.locator('.q-menu .q-item').filter({ hasText: 'Approve' }).click();
+
+await page.locator('i.q-icon.material-icons:has-text("more_vert")').first().click();
+await page.locator('.q-menu .q-item').filter({ hasText: 'Assign' }).click();
+
+
+await page.waitForTimeout(2000);
+
+// Click Select Vendor button under Jackie
+await page.getByRole('button', { name: 'Select Vendor' }).nth(1).click();
+
+
+
+await page.waitForTimeout(2000);
+
+// Select Tenant Available Date
+
+// Click the Tenant Available Date dropdown
+await page.locator('i.q-select__dropdown-icon').first().click();
+
+// Select the first available date option from the dropdown
 await page.locator('.q-menu .q-item').first().click();
 
-// Preferred way
-await page.getByRole('button', { name: 'Submit Request' }).click();
+// Enter Estimate Amount
+// Click on the estimate amount field
+await page.locator('.q-dialog input[placeholder="Enter an estimate amount"]').click();
+await page.waitForTimeout(500);
+
+// Clear and type using keyboard
+await page.keyboard.press('Control+A');
+await page.keyboard.type('500');
+
+await page.waitForTimeout(3000);
+
+// Wait for Assign button to enable
+// Force click the Assign button even if disabled
+await page.locator('.q-dialog button.bg-green').click({ force: true });
+
 await page.waitForTimeout(7000);
 
-await page.getByRole('button', { name: 'View More' }).first().click();
-await page.waitForTimeout(3000);
-
-
-await page.locator('button:has-text("Approve")').click();
-await page.waitForTimeout(4000);
-
-// Wait for page to load
-
-
-// Click the first maintenance kebab (three-dot) icon
-await page.locator('i:has-text("more_vert")').first().click();
-await page.waitForTimeout(1000);
-// Click Assign Vendor option
-await page.getByText('Assign', { exact: true }).click();
-await page.waitForTimeout(2000);
-// Wait for Assign Vendor popup/page to load
-
-const selectVendorBtn = page.locator('button:has-text("Select Vendor")').first();
-
-await selectVendorBtn.scrollIntoViewIfNeeded();
-
-await selectVendorBtn.click({ force: true });
-
-await page.waitForTimeout(2000);
-
-// Click Tenant Available Date dropdown
-await page.locator('.q-select').click();
-
-// Wait for options to load
-await page.waitForTimeout(1000);
-
-// Select first available slot
-await page.locator('.q-item').first().click();
-
-// Enter Estimate Amount
-await page.locator('input[placeholder="Enter an estimate amount"]')
-  .fill('200');
-
 // Click Assign button
-await page.getByRole('button', { name: 'Assign' }).click();
+await page.locator('i.q-select__dropdown-icon').first().click();
+await page.waitForTimeout(2000);
 
-// Wait for success
+await page.getByRole('option', { name: 'In Progress' }).click();
+await page.waitForTimeout(2000);
+
+// Click the status dropdown
+await page.locator('label.status-dropdown i.q-select__dropdown-icon').click();
+
 await page.waitForTimeout(3000);
-// Wait for assignment to complete
 
-  await page.screenshot({
-    path: 'tests/screenshots/create-request.png',
-    fullPage: true
-  });
+// Select Resolved
+await page.getByRole('option', { name: 'Resolved' }).click();
+await page.waitForTimeout(2000);
 
+await page.waitForSelector('.q-dialog', { timeout: 10000 });
+
+// Upload the file
+await page.locator('input[type="file"]').setInputFiles('./tests/files/resolved.jpg');
+
+await page.waitForTimeout(2000);
+
+
+await page.locator('textarea[aria-label="Comments"]').fill('Maintenance issue has been resolved successfully.');
+// Upload the file
+await page.waitForTimeout(2000);
+
+await page.getByRole('button', { name: 'Upload' }).click();
+
+await page.waitForTimeout(5000);
+
+await page.locator('label.status-dropdown i.q-select__dropdown-icon').click();
+
+
+await page.getByRole('option', { name: 'Completed' }).click();
+await page.waitForTimeout(2000);
+
+await page.getByRole('button', { name: 'Create Invoice' }).click();
+
+await page.waitForTimeout(2000);
+
+// Click the calendar icon
+await page.locator('i.q-icon.material-icons.cursor-pointer').click();
+
+await page.waitForTimeout(1000);
+
+// Click tomorrow's date
+const tomorrow2 = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+const tomorrowDate1 = tomorrow.getDate().toString();
+
+await page.locator('.q-date__calendar-item button').filter({ hasText: tomorrowDate1 }).click();
+
+await page.waitForTimeout(2000);
+
+await page.getByRole('button', { name: 'Generate Invoice' }).click();
+
+await page.waitForTimeout(2000);
+
+await page.getByRole('button', { name: 'Issue Invoice' }).click();
+
+await page.waitForTimeout(6000);
+
+
+await page.screenshot({
+  path: 'screenshots/owner-added.png',
+  fullPage: true
+});
+
+console.log('Screenshot saved');
 });

@@ -110,12 +110,32 @@ module.exports = [
    {
     firstName: 'Noah',
     lastName: 'Turner',
-    email: 'noah.turner@gmail.com',
+    email: 'mukeshsundar30+92@gmail.com',
     phone: '5557345678',
     emergencyContact: '5558345678',
     address: '400 Broad St, Seattle, WA 98109',
     city: 'Seattle',
     zipCode: '98109'
+  },
+  {
+    firstName: "Liam",
+    lastName: "Harrison",
+    email: "liam.harrison01@gmail.com",
+    phone: "5551234567",
+    emergencyContact: "5552234567",
+    address: "123 Maple Street, Austin, TX 73301",
+    city: "Austin",
+    zipCode: "73301"
+  },
+  {
+    firstName: "Sophia",
+    lastName: "Mitchell",
+    email: "sophia.mitchell02@gmail.com",
+    phone: "5553334567",
+    emergencyContact: "5554334567",
+    address: "456 Oak Avenue, Denver, CO 80201",
+    city: "Denver",
+    zipCode: "80201"
   },
 
 ];
