@@ -1,20 +1,61 @@
 module.exports = [
   {
-    propertyName: "Green Valley Apartments",
-    yearBuilt: "2020",
-    address: "123 Main Street",
-    city: "Dallas",
-    zipCode: "75001",
-    comments: "Well-maintained property near city center.",
-    unitName:"SE1",
-      bedrooms: "2",
-    bathrooms: "1",
-    builtArea: "1200",
-    rentAmount: "1500",
-    ownerReserveFund: "500",
-    lateFeePercentage: "10",
-    depositAmount: "3000"
-  },
+  propertyName: "Green Valley Apartments",
+  yearBuilt: "2020",
+  address: "123 Main Street",
+  city: "Seattle",
+  state: "California",
+  zipCode: "98101",
+  country: "United states",
+  comments: "Well-maintained property near city center.",
+  description: "Spacious and well-maintained property with modern amenities.",
+  property_image: "./tests/files/owner-document.jfif",
+  unitName: "SE1",
+  floornumber:"3",
+  bedrooms: "2",
+  bathrooms: "1",
+  fullBathrooms : "2",
+  halfBathrooms : "3",
+  builtArea: "1200",
+  rentAmount: "1500",
+  ownerReserveFund: "500",
+  lowPrice: "200",
+  highPrice : "1500",
+  lateFeePercentage: "10",
+  depositAmount: "3000",
+  lateFeePercentage: "20",
+  unitDescription: "Spacious unit with modern amenities and great city views."
+},
+
+
+{
+  propertyName: "Twilight Pines Retreat",
+  yearBuilt: "2018",
+  address: "72 Fernwood Circle",
+  city: "Portland",
+  state: "Oregon",
+  zipCode: "97201",
+  country: "United States",
+  comments: "Peaceful retreat surrounded by pine trees with modern amenities.",
+  description: "Well-furnished unit with open floor plan and natural lighting.",
+  property_image: "./tests/files/owner-document.jfif",
+  unitName: "TP2",
+  floorNumber: "2",
+  bedrooms: "3",
+  bathrooms: "2",
+  fullBathrooms: "1",
+  halfBathrooms: "1",
+  builtArea: "1500",
+  rentAmount: "2000",
+  ownerReserveFund: "600",
+  lowPrice: "1800",
+  highPrice: "2000",
+  lateFeePercentage: "15",
+  depositAmount: "4000",
+  unitDescription: "Cozy unit with pine tree views and spacious living area."
+},
+
+
    {
     propertyName: "Blue Ridge Condos",
     yearBuilt: "2018",
@@ -207,7 +248,113 @@ module.exports = [
   ownerReserveFund: "720",
   lateFeePercentage: "14",
   depositAmount: "3900"
-}
+},
+{
+  propertyName: "Twice Apartment",
+  yearBuilt: "2015",
+  address: "US",
+  city: "Raleigh",
+  zipCode: "27601",
+  comments: "Peaceful retreat surrounded by pine trees with modern amenities.",
+  unitName: "TP6",
+  bedrooms: "3",
+  bathrooms: "2",
+  builtArea: "1750",
+  rentAmount: "1950",
+  ownerReserveFund: "720",
+  lateFeePercentage: "14",
+  depositAmount: "3900"
+},
+{
+    propertyName: "Maple Grove Residency",
+    yearBuilt: "2018",
+    address: "US",
+    city: "Austin",
+    zipCode: "73301",
+    comments: "Modern living spaces with rooftop garden and gym facilities.",
+    unitName: "MG2",
+    bedrooms: "2",
+    bathrooms: "1",
+    builtArea: "1200",
+    rentAmount: "1600",
+    ownerReserveFund: "580",
+    lateFeePercentage: "12",
+    depositAmount: "3200"
+  },
+
+  // ── Index 2 ──────────────────────────────────────────────────────
+  {
+    propertyName: "Sunset Heights",
+    yearBuilt: "2012",
+    address: "US",
+    city: "Denver",
+    zipCode: "80201",
+    comments: "Stunning mountain views with open-plan layouts and secure parking.",
+    unitName: "SH4",
+    bedrooms: "4",
+    bathrooms: "3",
+    builtArea: "2100",
+    rentAmount: "2400",
+    ownerReserveFund: "900",
+    lateFeePercentage: "15",
+    depositAmount: "4800"
+  },
+
+  // ── Index 3 ──────────────────────────────────────────────────────
+  {
+    propertyName: "Harbor View Flats",
+    yearBuilt: "2020",
+    address: "US",
+    city: "Miami",
+    zipCode: "33101",
+    comments: "Waterfront property with smart home features and concierge service.",
+    unitName: "HV1",
+    bedrooms: "1",
+    bathrooms: "1",
+    builtArea: "850",
+    rentAmount: "1350",
+    ownerReserveFund: "500",
+    lateFeePercentage: "10",
+    depositAmount: "2700"
+  },
+
+  // ── Index 4 ──────────────────────────────────────────────────────
+  {
+    propertyName: "Oakwood Terrace",
+    yearBuilt: "2016",
+    address: "US",
+    city: "Charlotte",
+    zipCode: "28201",
+    comments: "Family-friendly complex with playground, pool, and nearby schools.",
+    unitName: "OT3",
+    bedrooms: "3",
+    bathrooms: "2",
+    builtArea: "1600",
+    rentAmount: "1800",
+    ownerReserveFund: "650",
+    lateFeePercentage: "13",
+    depositAmount: "3600"
+  },
+
+  // ── Index 5 ──────────────────────────────────────────────────────
+  {
+    propertyName: "Skyline Suites",
+    yearBuilt: "2022",
+    address: "US",
+    city: "Seattle",
+    state: "california",
+    zipCode: "98101",
+    comments: "Luxury high-rise with panoramic city views and co-working spaces.",
+    property_image: "./tests//owner-document.jfifilesf",
+    unitName: "SS7",
+    bedrooms: "2",
+    bathrooms: "2",
+    builtArea: "1400",
+    rentAmount: "2200",
+    ownerReserveFund: "800",
+    lateFeePercentage: "11",
+    depositAmount: "4400"
+  }
 
 ];
 

@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 test.setTimeout(180000); // ✅ Increase to 180 seconds
-
+const { loginAsManager } = require('../utils/login');
 const tenantData = require('../testdata/tenantdata');
 const tenant = tenantData[0];
 
@@ -100,14 +100,32 @@ await formPage.locator('input[name="password"]').fill(tenant.password);
 // Fill confirm password
 // Fill confirm password (second password field)
 await formPage.locator('input[type="password"]').nth(1).fill(tenant.confirmPassword);
-
-await formPage.waitForTimeout(1000);
-
-// Click Create button
 await formPage.getByRole('button', { name: 'Create' }).click();
+await formPage.waitForTimeout(10000);
 
-await formPage.waitForTimeout(3000);
+// ─── Re-login as Manager ───────────────────────────────────────────────────
+// ─── Re-login as Manager ───────────────────────────────────────────────────
+await page.bringToFront();
+await page.goto('https://rentgeniux.onrender.com');
 
+// Wait for login page to load
+await page.waitForSelector('input[name="username"]', { timeout: 10000 });
+
+await page.locator('input[name="username"]').fill('victoria');
+await page.locator('input[name="password"]').fill('Victoria@123');
+await page.getByRole('button', { name: 'Login' }).click();
+await page.waitForURL('**/manager', { timeout: 30000 });
+await page.waitForTimeout(2000);
+
+// Navigate to Manage Lease
+await page.locator('.lucide-chevron-down').nth(2).click();
+await page.waitForTimeout(1000);
+await page.getByRole('button', { name: 'Manage Lease' }).click();
+await page.waitForTimeout(2000);
+
+await page.locator('i.q-icon.material-icons:has-text("chevron_right")').first().click();
+
+await page.locator('.q-item__label').filter({ hasText: tenant.u }).click();
 // Now fill the registration form
   // 8. Screenshot
   /*await page.screenshot({

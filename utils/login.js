@@ -1,6 +1,4 @@
-
-
-  async function loginAsManager(page) {
+async function loginAsManager(page) {
   // Step 1: Go to app
   await page.goto('https://rentgeniux.onrender.com');
 

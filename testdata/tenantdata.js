@@ -1,16 +1,16 @@
 module.exports = [
   {
-    firstName: "Mahesh",
-    lastName: "M",
-    email: "harshath2912+33@gmail.com",
-    phone: "6298880003",
+    firstName: "Ajai",
+    lastName: "Aravind",
+    email: "harshath2912+77@gmail.com",
+    phone: "6981502678",
     gmailEmail: "harshath2912@gmail.com",
-     emergencyContact: "5558345678",
+     emergencyContact: "6281502678",
     address: "ad",
     document1: "./tests/files/owner-document.jfif",
     document2: "./tests/files/owner-document.jfif",
-    username: "andrew",
-    password: "Andrew@123",
-    confirmPassword: "Andrew@123"
+    username: "ajai",
+    password: "Ajai@12345",
+    confirmPassword: "Ajai@12345"
   }
 ];
