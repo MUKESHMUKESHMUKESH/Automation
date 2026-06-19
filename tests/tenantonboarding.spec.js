@@ -2,16 +2,16 @@ const { test, expect } = require('@playwright/test');
 test.setTimeout(180000); // ✅ Increase to 180 seconds
 const { loginAsManager } = require('../utils/login');
 const tenantData = require('../testdata/tenantdata');
-const tenant = tenantData[0];
+const tenant = tenantData[32];
 
 test('Manager → Tenant Onboarding Flow', async ({ page }) => {
 
   // 1. Open application
-  await page.goto('https://rentgeniux.onrender.com');
+  await page.goto('https://rentgeniux.onrender.com/#/login');
 
-  // 2. Login
-  await page.locator('input[name="username"]').fill('victoria');
-  await page.locator('input[name="password"]').fill('Victoria@123');
+  // 2. Login 
+  await page.locator('input[name="username"]').fill('manager');
+  await page.locator('input[name="password"]').fill('Manager@123');
   await page.getByRole('button', { name: 'Login' }).click();
 
   // 3. Wait for dashboard
@@ -20,7 +20,7 @@ test('Manager → Tenant Onboarding Flow', async ({ page }) => {
   // 4. Click Tenants sidebar
 await page.locator('.lucide-chevron-down').nth(2).click();
 
-  await page.getByRole('button', { name: 'Tenant Onboarding' }).click();
+  await page.getByRole('button', { name: 'Manage Tenant' }).click();
 
   await page.waitForTimeout(2000);
 
@@ -105,27 +105,191 @@ await formPage.waitForTimeout(10000);
 
 // ─── Re-login as Manager ───────────────────────────────────────────────────
 // ─── Re-login as Manager ───────────────────────────────────────────────────
-await page.bringToFront();
-await page.goto('https://rentgeniux.onrender.com');
+// Open in a new page
+// ─── Re-login as Manager ───────────────────────────────────────────────────
+const managerPage = await page.context().newPage();
 
-// Wait for login page to load
-await page.waitForSelector('input[name="username"]', { timeout: 10000 });
+// ✅ Wait for network idle so Vue app fully boots before checking DOM
+await managerPage.goto('https://rentgeniux.onrender.com/#/login', { 
+  waitUntil: 'networkidle',
+  timeout: 60000 
+});
 
-await page.locator('input[name="username"]').fill('victoria');
-await page.locator('input[name="password"]').fill('Victoria@123');
-await page.getByRole('button', { name: 'Login' }).click();
-await page.waitForURL('**/manager', { timeout: 30000 });
-await page.waitForTimeout(2000);
+// ✅ Wait for Vue to render — check body is not empty first
+await managerPage.waitForFunction(() => document.body.children.length > 0, { timeout: 30000 });
 
-// Navigate to Manage Lease
-await page.locator('.lucide-chevron-down').nth(2).click();
-await page.waitForTimeout(1000);
-await page.getByRole('button', { name: 'Manage Lease' }).click();
-await page.waitForTimeout(2000);
+// ✅ Now wait for the input
+await managerPage.waitForSelector('input[name="username"]', { 
+  state: 'visible', 
+  timeout: 30000 
+});
 
-await page.locator('i.q-icon.material-icons:has-text("chevron_right")').first().click();
+await managerPage.locator('input[name="username"]').fill('manager');
+await managerPage.locator('input[name="password"]').fill('Manager@123');
+await managerPage.getByRole('button', { name: 'Login' }).click();
 
-await page.locator('.q-item__label').filter({ hasText: tenant.u }).click();
+// ✅ Wait for dashboard on managerPage
+await managerPage.waitForURL('**/manager', { timeout: 60000 });
+await managerPage.waitForTimeout(1000);
+
+// ✅ All subsequent actions on managerPage
+await managerPage.locator('.lucide-chevron-down').nth(2).click();
+
+const manageLeaseBtn = managerPage.getByRole('button', { name: 'Manage Lease' });
+await manageLeaseBtn.waitFor({ state: 'visible', timeout: 10000 });
+await managerPage.waitForTimeout(400);
+await manageLeaseBtn.click();
+
+await managerPage.waitForTimeout(2000);
+
+await managerPage.locator('i.q-icon.material-icons:has-text("chevron_right")').first().click();
+
+
+
+// ✅ Wait for button to exist first
+await managerPage.waitForSelector('button', { timeout: 15000 });
+
+// ✅ Scroll into view and click in one go
+const setupBtn = managerPage.getByRole('button', { name: 'Set Up Lease Document' });
+await setupBtn.scrollIntoViewIfNeeded();
+await setupBtn.waitFor({ state: 'visible', timeout: 10000 });
+await setupBtn.click();
+await managerPage.waitForTimeout(2000);
+
+// ✅ Declare ALL dates ONCE at the top
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+const tomorrowDay = tomorrow.getDate().toString();
+
+
+// ✅ 1. Click Agreement Date field
+await managerPage.locator('[data-field-name="agreement_date"]').click();
+await managerPage.waitForTimeout(500);
+
+// ✅ Click calendar icon
+await managerPage.locator('i.q-icon.material-icons:has-text("event")').first().click();
+await managerPage.waitForTimeout(1000);
+
+// ✅ Click tomorrow in calendar
+await managerPage.evaluate((day) => {
+  const cells = document.querySelectorAll('td, .q-date__calendar-item button');
+  for (const cell of cells) {
+    if (cell.textContent.trim() === day) { cell.click(); break; }
+  }
+}, tomorrowDay);
+await managerPage.waitForTimeout(1000);
+
+// ✅ 2. Click Property Manager Name
+await managerPage.locator('div[style*="cursor: pointer"]')
+  .filter({ hasText: '[Property Manager Name]' })
+  .click();
+await managerPage.waitForTimeout(800);
+await managerPage.waitForSelector('input[aria-label="Enter Value"]', { timeout: 10000 });
+const inputs = managerPage.locator('input[aria-label="Enter Value"]');
+const count = await inputs.count();
+await inputs.nth(count - 1).fill('Jaya Sudharsan');
+await managerPage.waitForTimeout(500);
+
+// ✅ 3. Click Company Type
+await managerPage.locator('div[style*="cursor: pointer"]')
+  .filter({ hasText: '[Company Type]' })
+  .click();
+await managerPage.waitForTimeout(500);
+const inputs2 = managerPage.locator('input[aria-label="Enter Value"]');
+const count2 = await inputs2.count();
+await inputs2.nth(count2 - 1).fill('Property Management');
+await managerPage.waitForTimeout(500);
+
+// ✅ 4. Click Property Manager Address
+await managerPage.locator('div[style*="cursor: pointer"]')
+  .filter({ hasText: '[Property Manager Address]' })
+  .click();
+await managerPage.waitForTimeout(500);
+const inputs3 = managerPage.locator('input[aria-label="Enter Value"]');
+const count3 = await inputs3.count();
+await inputs3.nth(count3 - 1).fill('205 Sunset Street, Denver, 80201');
+await managerPage.waitForTimeout(500);
+
+// ✅ Scroll down to find date fields
+await managerPage.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+await managerPage.waitForTimeout(1000);
+
+// ✅ 5. Click Start Date field
+await managerPage.locator('[data-field-name="start_date"]').click();
+await managerPage.waitForTimeout(500);
+
+// ✅ Click calendar icon for Start Date
+await managerPage.locator('i.material-icons:has-text("event")').first().click();
+await managerPage.waitForTimeout(1000);
+
+// ✅ Click tomorrow using evaluate
+await managerPage.evaluate((day) => {
+  const cells = document.querySelectorAll('td, .q-date__calendar-item button');
+  for (const cell of cells) {
+    if (cell.textContent.trim() === day) { cell.click(); break; }
+  }
+}, tomorrowDay);
+await managerPage.waitForTimeout(1000);
+
+
+// ✅ 6. Click End Date field
+await managerPage.locator('[data-field-name="end_date"]').click();
+await managerPage.waitForTimeout(500);
+
+const endDate = new Date(tomorrow);
+endDate.setDate(endDate.getDate() + 60);
+const endDay = endDate.getDate().toString();
+const endMonth = endDate.toLocaleString('default', { month: 'long' }); // e.g., "August"
+const endYear = endDate.getFullYear().toString(); // e.g., "2026"
+
+console.log('Start Date:', tomorrow.toDateString());
+console.log('End Date:', endDate.toDateString());
+console.log('endDay:', endDay, '| endMonth:', endMonth, '| endYear:', endYear);
+
+
+// ✅ Click calendar icon for End Date
+await managerPage.locator('i.material-icons:has-text("event")').last().click();
+await managerPage.waitForTimeout(1000);
+
+// ✅ Click chevron_right TWICE to navigate 2 months forward
+await managerPage.locator('i.q-icon.material-icons:has-text("chevron_right")').first().click();
+await managerPage.waitForTimeout(500);
+await managerPage.locator('i.q-icon.material-icons:has-text("chevron_right")').first().click();
+await managerPage.waitForTimeout(500);
+
+// ✅ Click end date using evaluate
+await managerPage.evaluate((day) => {
+  const cells = document.querySelectorAll('td, .q-date__calendar-item button');
+  for (const cell of cells) {
+    if (cell.textContent.trim() === day) { cell.click(); break; }
+  }
+}, endDay);
+await managerPage.waitForTimeout(1000);
+
+
+// ✅ Navigate to correct month if different from current
+await managerPage.evaluate(async (targetMonth, targetYear) => {
+  let attempts = 0;
+  while (attempts < 12) {
+    const header = document.querySelector('.q-date__header-subtitle, .q-date__header-title');
+    if (header && header.textContent.includes(targetMonth) && header.textContent.includes(targetYear)) break;
+    const nextBtn = document.querySelector('button[aria-label="Next month"], .q-date__arrow button');
+    if (nextBtn) nextBtn.click();
+    await new Promise(r => setTimeout(r, 300));
+    attempts++;
+  }
+}, endMonth, endYear);
+await managerPage.waitForTimeout(500);
+
+// ✅ Click end date using evaluate
+await managerPage.evaluate((day) => {
+  const cells = document.querySelectorAll('td, .q-date__calendar-item button');
+  for (const cell of cells) {
+    if (cell.textContent.trim() === day) { cell.click(); break; }
+  }
+}, endDay);
+await managerPage.waitForTimeout(1000);
+
 // Now fill the registration form
   // 8. Screenshot
   /*await page.screenshot({

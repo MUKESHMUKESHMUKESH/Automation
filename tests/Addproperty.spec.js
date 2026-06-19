@@ -6,8 +6,8 @@ test('Manager → Navigate to Add Property', async ({ page }) => {
     await page.goto('https://rentgeniux.onrender.com/#/login');
 
     // Login
-    await page.locator('input[name="username"]').fill('victoria');
-    await page.locator('input[name="password"]').fill('Victoria@123');
+    await page.locator('input[name="username"]').fill('manager');
+    await page.locator('input[name="password"]').fill('Manager@123');
     await page.getByRole('button', { name: 'Login' }).click();
 
     // Wait for dashboard
@@ -36,7 +36,7 @@ test('Manager → Navigate to Add Property', async ({ page }) => {
 
 await page.waitForTimeout(5000)
  
-// Click the dropdown
+   // Click the dropdown
 await page.locator('input[role="combobox"]').click();
 
 // Wait for options to appear
@@ -49,7 +49,7 @@ await page.locator('span.block', { hasText: 'Continue' }).click();
 await page.waitForTimeout(1000)
 
 const propertyData = require('../testdata/addpropertydata');
-const property = propertyData[1];
+const property = propertyData[8];
        
 // Property Name
 await page.locator('input[type="text"]').first().fill(property.propertyName);
@@ -128,7 +128,7 @@ await page.getByText('Parking Type').click();
 
 
 // Upload file
-await page.locator('input[type="file"]').nth(0).setInputFiles('./tests/files/owner-document.jfif');
+await page.locator('input[type="file"]').nth(0).setInputFiles('./tests/files/property-image32.avif');
 await page.locator('input[type="file"]').nth(1).setInputFiles('./tests/files/owner-document.pdf');
 
 
@@ -142,45 +142,47 @@ await page.locator('input[type="text"].q-field__native').first().fill(property.u
 
 // Floor Number
 // Floor Number - use nth text input
-await page.locator('input[type="text"].q-field__native').nth(1).fill(property.floorNumber);
+
 
 // All number inputs
 const numberInputs = page.locator('input[type="number"]:not([readonly])');
 
+
+await numberInputs.nth(0).pressSequentially(property.floorNumber);
 // Number of Bed Rooms
-await numberInputs.nth(0).pressSequentially(property.bedrooms);
+await numberInputs.nth(1).pressSequentially(property.bedrooms);
 
 // Number of Bath Rooms
-await numberInputs.nth(1).pressSequentially(property.bathrooms);
+await numberInputs.nth(2).pressSequentially(property.bathrooms);
 
 // Number of Full Bath Rooms
-await numberInputs.nth(2).pressSequentially(property.fullBathrooms);
+await numberInputs.nth(3).pressSequentially(property.fullBathrooms);
 
 // Number of Half Bath Rooms
-await numberInputs.nth(3).pressSequentially(property.halfBathrooms);
+await numberInputs.nth(4).pressSequentially(property.halfBathrooms);
 
 // Built Area in sq.ft
-await numberInputs.nth(4).pressSequentially(property.builtArea);
+await numberInputs.nth(5).pressSequentially(property.builtArea);
 
 // Monthly Rent
-await page.locator('input[type="number"][min="0"][step="1"]').nth(5).pressSequentially(property.rentAmount);
+await page.locator('input[type="number"][min="0"][step="1"]').nth(6).pressSequentially(property.rentAmount);
 
 // Owner Reserve Fund
-await page.locator('input[type="number"][min="0"][step="1"]').nth(7).pressSequentially(property.ownerReserveFund);
+await page.locator('input[type="number"][min="0"][step="1"]').nth(8).pressSequentially(property.ownerReserveFund);
 
 // Low Price
-await page.locator('input[type="number"][min="0"][step="1"]').nth(8).pressSequentially(property.lowPrice);
+await page.locator('input[type="number"][min="0"][step="1"]').nth(9).pressSequentially(property.lowPrice);
 
 // High Price
-await page.locator('input[type="number"][min="0"][step="1"]').nth(9).pressSequentially(property.highPrice);
+await page.locator('input[type="number"][min="0"][step="1"]').nth(10).pressSequentially(property.highPrice);
 
 await page.locator('textarea.q-field__native.q-placeholder').fill(property.unitDescription);
 
 await page.locator('input[type="number"][max="30"]').pressSequentially(property.lateFeePercentage);
 
-await page.locator('input[type="file"]').nth(0).setInputFiles('./tests/files/owner-document.jfif');
+await page.locator('input[type="file"]').nth(0).setInputFiles('./tests/files/unit.jpg');
 
-await page.locator('input[type="file"]').nth(1).setInputFiles('./tests/files/owner-document.jfif');
+await page.locator('input[type="file"]').nth(1).setInputFiles('./tests/files/floor.jpg');
 // Click Add button
 await page.locator('button.add-btn').click();
 await page.waitForTimeout(3000);
@@ -188,14 +190,19 @@ await page.waitForTimeout(3000);
 await page.getByRole('button', { name: 'Save' }).click();
 
 await page.waitForTimeout(5000);
-// Click the last dropdown arrow
-// Click the Verified status dropdown (Change Status - last column)
-await page.locator('i.q-select__dropdown-icon').nth(4).click();
 
-// Select Verified option
-await page.getByRole('option', { name: 'Verified' }).click();
-await page.locator('svg.lucide-check').click();
-await page.waitForTimeout(3000);
+await page.getByRole('tab', { name: 'Review' }).click();
+await page.waitForTimeout(1000);
+
+await page.locator('button.verify-btn-active').click();
+await page.waitForTimeout(1000);
+
+await page.locator('.q-card').getByRole('button', { name: 'Preview and Verify' }).click();
+await page.waitForTimeout(1000);
+
+await page.locator('button.verify-btn').click();
+await page.waitForTimeout(1000);
+
 
 await page.screenshot({
   path: 'tests/screenshots/Addproperty.png',
