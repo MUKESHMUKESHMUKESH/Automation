@@ -1,18 +1,18 @@
 module.exports = [
   
-  {
-  firstName: "Leonardo",
-  lastName: "W",
-  email: "harshath2912+135@gmail.com",
-  phone: "9971502678",
-  gmailEmail: "harshath2912@gmail.com",
-  emergencyContact: "8871502678",
-  address: "ad",
+{
+  firstName: "Raymond",
+  lastName: "Fletcher",
+  email: "harshath2912+342@gmail.com",
+  phone: "4482613789",
+  gmailEmail: "harshath2912+142@gmail.com",
+  emergencyContact: "3382613789",
+  address: "56 Maplewood Drive",
   document1: "./tests/files/owner-document.jfif",
   document2: "./tests/files/owner-document.jfif",
-  username: "leonardow",
-  password: "Leonardo@123",
-  confirmPassword: "Leonardo@123"
+  username: "raymondflet",
+  password: "Raymond@123",
+  confirmPassword: "Raymond@123"
 },
 {
   firstName: "Scarlett",

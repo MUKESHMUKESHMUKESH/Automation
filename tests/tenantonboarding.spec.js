@@ -2,7 +2,7 @@ const { test, expect } = require('@playwright/test');
 test.setTimeout(700000); // ✅ Increase to 180 seconds
 const { loginAsManager } = require('../utils/login');
 const tenantData = require('../testdata/tenantdata');
-const tenant = tenantData[41];
+const tenant = tenantData[0];
 
 test('Manager → Tenant Onboarding Flow', async ({ page }) => {
 
