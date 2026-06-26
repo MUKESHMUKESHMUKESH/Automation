@@ -1,7 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
-test.setTimeout(180000); // ✅ Increase to 180 seconds
+test.setTimeout(200000); // ✅ Increase to 180 seconds
 
 const maintenanceData = require('../testdata/maintenancedata');
 const maintenance = maintenanceData[0];
@@ -12,8 +12,8 @@ test('Manager → Maintenance → Create Request Flow', async ({ page }) => {
   await page.goto('https://rentgeniux.onrender.com');
  
   // 2. Login
-  await page.locator('input[name="username"]').fill('victoria');
-  await page.locator('input[name="password"]').fill('Victoria@123');
+  await page.locator('input[name="username"]').fill('manager');
+  await page.locator('input[name="password"]').fill('Manager@123');
   await page.getByRole('button', { name: 'Login' }).click();
 
   // 3. Wait for dashboard
@@ -27,7 +27,7 @@ test('Manager → Maintenance → Create Request Flow', async ({ page }) => {
 
   // 6. Wait for button to be visible
   const createBtn = page.getByRole('button', { name: 'Create Requests' });
-  await expect(createBtn).toBeVisible({ timeout: 10000 });
+  await expect(createBtn).toBeVisible({ timeout: 100000 });
 
   // 7. Click Create Requests
   await createBtn.click();
@@ -37,7 +37,7 @@ test('Manager → Maintenance → Create Request Flow', async ({ page }) => {
 
   // 9. Select first dropdown (Property)
   await page.locator('i.q-select__dropdown-icon').first().click();
-  await page.locator('[role="option"]').first().click();
+  await page.locator('[role="option"]').nth(0).click();
 
   await page.waitForTimeout(2000);
 

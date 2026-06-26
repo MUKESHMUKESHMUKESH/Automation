@@ -1,211 +1,196 @@
 const { test, expect } = require('@playwright/test');
+const propertyData = require('../testdata/addpropertydata');
+
+test.setTimeout(600000); // 10 minutes for bulk
 
 test('Manager → Navigate to Add Property', async ({ page }) => {
-    test.setTimeout(100000);
-    // Open application
-    await page.goto('https://rentgeniux.onrender.com/#/login');
 
-    // Login
-    await page.locator('input[name="username"]').fill('manager');
-    await page.locator('input[name="password"]').fill('Manager@123');
-    await page.getByRole('button', { name: 'Login' }).click();
+  // ✅ Login ONCE
+  await page.goto('https://dev-rentgeniux.onrender.com/#/login');
+  await page.locator('input[name="username"]').fill('manager');
+  await page.locator('input[name="password"]').fill('Manager@123');
+  await page.getByRole('button', { name: 'Login' }).click();
+  await page.waitForURL('**/manager');
+  await page.waitForLoadState('networkidle');
+  console.log('✅ Logged in!');
 
-    // Wait for dashboard
-    await page.waitForURL('**/manager');
+  // ✅ FOR LOOP starts here
+
+
+    // ✅ Navigate inside loop (every iteration)
+    await page.locator('button.nav-btn').filter({ hasText: 'Properties' }).click();
+    await page.waitForTimeout(1000);
+    await page.locator('button.submenu-btn').filter({ hasText: 'Manage Properties' }).click();
     await page.waitForLoadState('networkidle');
 
-    // Click Properties menu
-    await page.locator('button.nav-btn')
-        .filter({ hasText: 'Properties' })
-        .click();
+      for (let i = 0; i < propertyData.length; i++) {
+    const property = propertyData[i];
+    console.log(`\n🔄 Adding Property ${i + 1}/${propertyData.length}: ${property.propertyName}`);
+    // ✅ Click Add Property
+    await page.locator('div.text-black.text-weight-medium', { hasText: 'Add Property' }).click();
+    await page.waitForTimeout(5000);
 
-    // Wait for submenu
+    // ✅ Select Owner dropdown - nth(0) to avoid strict mode error
+    await page.locator('input[role="combobox"]').nth(0).click();
+    await page.waitForSelector('[role="option"]');
+    await page.locator('[role="option"]').nth(1).click();
+    console.log('✅ Owner selected!');
+
+    // ✅ Click Continue
+    await page.locator('span.block', { hasText: 'Continue' }).click();
     await page.waitForTimeout(1000);
 
-    // Example: Click Manage Properties
-    // Change the text if your submenu name is different
-    await page.locator('button.submenu-btn')
-        .filter({ hasText: 'Manage Properties' })
-        .click();
-// Verify Add Property page is opened
-    await page.waitForLoadState('networkidle');
+    // ✅ Property Name
+    await page.locator('input[type="text"]').first().fill(property.propertyName);
+    console.log('✅ Property Name filled!');
 
-    await page.locator('div.text-black.text-weight-medium', {
-  hasText: 'Add Property'
-}).click();
+    // ✅ Property Type Dropdown
+    await page.locator('input[role="combobox"]').nth(0).click();
+    await page.waitForSelector('[role="option"]');
+    await page.getByText('Large').click();
+    console.log('✅ Property Type selected!');
 
-await page.waitForTimeout(5000)
- 
-   // Click the dropdown
-await page.locator('input[role="combobox"]').click();
+    // ✅ Year Built
+    await page.locator('input[type="number"]').nth(0).fill(property.yearBuilt);
+    console.log('✅ Year Built filled!');
 
-// Wait for options to appear
-await page.waitForSelector('[role="option"]');
+    // ✅ Furnishing Status Dropdown
+    await page.waitForTimeout(1000);
+    const options = await page.locator('.q-item').allTextContents();
+    console.log(options);
+    await page.locator('.q-item').first().click();
+    await page.locator('input[role="combobox"]').nth(1).click();
+    await page.waitForTimeout(2000);
+    await page.locator('[role="option"]').first().click({ force: true });
+    console.log('✅ Furnishing Status selected!');
 
-// Select the first person
-await page.locator('[role="option"]').first().click();
+    // ✅ Address
+    await page.locator('input[type="search"][role="combobox"]').fill(property.address);
+    await page.waitForTimeout(1000);
+    console.log('✅ Address filled!');
 
-await page.locator('span.block', { hasText: 'Continue' }).click();
-await page.waitForTimeout(1000)
+    // ✅ City
+    await page.locator('input[type="text"]').nth(1).fill(property.city);
+    console.log('✅ City filled!');
 
-const propertyData = require('../testdata/addpropertydata');
-const property = propertyData[8];
-       
-// Property Name
-await page.locator('input[type="text"]').first().fill(property.propertyName);
+    // ✅ Country
+    await page.locator('input[placeholder="Enter country"]').fill(property.country);
+    console.log('✅ Country filled!');
 
-// Property Type Dropdown
-await page.locator('input[role="combobox"]').nth(0).click();
-await page.waitForSelector('[role="option"]');
-await page.getByText('Large').click();
+    // ✅ State Dropdown
+    await page.locator('input[role="combobox"]').last().click();
+    await page.waitForSelector('[role="option"]');
+    await page.waitForTimeout(1000);
+    await page.locator('[role="option"]').first().click();
+    await page.waitForTimeout(1000);
+    console.log('✅ State selected!');
 
-// Year Built
-await page.locator('input[type="number"]').nth(0).fill(property.yearBuilt);
+    // ✅ City Name
+    await page.getByPlaceholder('Enter city name').fill(property.city);
+    console.log('✅ City Name filled!');
 
-     // Click dropdown
-// Open Furnishing Status dropdown
+    // ✅ State
+    await page.locator('input[placeholder="Enter state"]').fill(property.state);
+    console.log('✅ State filled!');
 
+    // ✅ Zip Code
+    await page.locator('input[placeholder="Enter zipcode"]').fill(property.zipCode);
+    console.log('✅ Zip Code filled!');
 
-// Wait for dropdown options
-await page.waitForTimeout(1000);
+    // ✅ Description
+    await page.locator('textarea[placeholder="Enter property description"]').fill(property.comments);
+    console.log('✅ Description filled!');
 
-// Print options for debugging
-const options = await page.locator('.q-item').allTextContents();
-console.log(options);
+    // ✅ Amenities
+    await page.getByRole('button', { name: 'Select amenities' }).click();
+    await page.getByText('Swimming Pool', { exact: true }).click();
+    console.log('✅ Amenities selected!');
 
-// Select first option
-await page.locator('.q-item').first().click();
+    // ✅ Parking Type
+    await page.getByText('Parking Type').click();
+    console.log('✅ Parking Type clicked!');
 
-// Open Furnishing Status dropdown
-// Open Furnishing Status dropdown
-await page.locator('input[role="combobox"]').nth(1).click();
+    // ✅ Upload Property Files
+    await page.locator('input[type="file"]').nth(0).setInputFiles('./tests/files/property-image32.avif');
+    await page.locator('input[type="file"]').nth(1).setInputFiles('./tests/files/owner-document.pdf');
+    console.log('✅ Property files uploaded!');
 
-// Wait for options
-await page.waitForTimeout(2000);
+    // ✅ Continue to Unit
+    await page.getByRole('button', { name: 'Continue' }).click();
+    console.log('✅ Continue clicked!');
 
-// Click the first visible option
-await page.locator('[role="option"]').first().click({ force: true });
+    // ✅ Add Unit
+    await page.getByRole('button', { name: 'Add Unit' }).click();
+    console.log('✅ Add Unit clicked!');
 
-await page.locator('input[type="search"][role="combobox"]')
-  .fill(property.address);
+    // ✅ Unit Name
+    await page.locator('input[type="text"].q-field__native').first().fill(property.unitName);
+    console.log('✅ Unit Name filled!');
 
-await page.locator('input[type="text"]').nth(1).fill(property.city);
+    // ✅ Number Inputs
+    const numberInputs = page.locator('input[type="number"]:not([readonly])');
+    await numberInputs.nth(0).pressSequentially(property.floorNumber);
+    await numberInputs.nth(1).pressSequentially(property.bedrooms);
+    await numberInputs.nth(2).pressSequentially(property.bathrooms);
+    await numberInputs.nth(3).pressSequentially(property.fullBathrooms);
+    await numberInputs.nth(4).pressSequentially(property.halfBathrooms);
+    await numberInputs.nth(5).pressSequentially(property.builtArea);
+    console.log('✅ Number inputs filled!');
 
-await page.locator('input[placeholder="Enter country"]').fill(property.country);
+    // ✅ Rent & Price
+    await page.locator('input[type="number"][min="0"][step="1"]').nth(6).pressSequentially(property.rentAmount);
+    await page.locator('input[type="number"][min="0"][step="1"]').nth(8).pressSequentially(property.ownerReserveFund);
+    await page.locator('input[type="number"][min="0"][step="1"]').nth(9).pressSequentially(property.lowPrice);
+    await page.locator('input[type="number"][min="0"][step="1"]').nth(10).pressSequentially(property.highPrice);
+    console.log('✅ Rent & Price filled!');
 
-// Open dropdown
-await page.locator('input[role="combobox"]').last().click();
+    // ✅ Unit Description
+    await page.locator('textarea.q-field__native.q-placeholder').fill(property.unitDescription);
+    console.log('✅ Unit Description filled!');
 
-// Wait for options to appear
-await page.waitForSelector('[role="option"]');
-await page.waitForTimeout(1000);
+    // ✅ Late Fee Percentage
+    await page.locator('input[type="number"][max="30"]').pressSequentially(property.lateFeePercentage);
+    console.log('✅ Late Fee filled!');
 
-// Select first option
-await page.locator('[role="option"]').first().click();
+    // ✅ Upload Unit Files
+    await page.locator('input[type="file"]').nth(0).setInputFiles('./tests/files/unit.jpg');
+    await page.locator('input[type="file"]').nth(1).setInputFiles('./tests/files/floor.jpg');
+    console.log('✅ Unit files uploaded!');
 
-await page.waitForTimeout(1000);
+    // ✅ Click Add Unit
+    await page.locator('button.add-btn').click();
+    await page.waitForTimeout(3000);
+    console.log('✅ Unit Added!');
 
-await page.getByPlaceholder('Enter city name').fill(property.city);
+    // ✅ Save
+    await page.getByRole('button', { name: 'Save' }).click();
+    await page.waitForTimeout(5000);
+    console.log('✅ Saved!');
 
-await page.locator('input[placeholder="Enter state"]').fill(property.state);
+    // ✅ Review Tab
+    await page.getByRole('tab', { name: 'Review' }).click();
+    await page.waitForTimeout(1000);
 
-// By class - target all matching inputs and pick the last one (zip is the last text field)
-await page.locator('input[placeholder="Enter zipcode"]').fill(property.zipCode);
+    // ✅ Verify Steps
+    await page.locator('button.verify-btn-active').first().click();
+    await page.waitForTimeout(1000);
+    await page.locator('.q-card').getByRole('button', { name: 'Preview and Verify' }).click();
+    await page.waitForTimeout(5000);
+    await page.locator('button.verify-btn').click();
+    await page.waitForTimeout(5000);
+    await page.waitForSelector('.q-card', { timeout: 10000 });
+    await page.locator('.q-card').getByRole('button', { name: 'Verify' }).click();
+    await page.waitForTimeout(3000);
+    console.log(`✅ Property ${i + 1} Done: ${property.propertyName}`);
 
+    // ✅ Screenshot per property
+    await page.screenshot({
+      path: `tests/screenshots/Property_${i + 1}.png`,
+      fullPage: true
+    });
 
-await page.locator('textarea[placeholder="Enter property description"]').fill(property.comments);
-// Click Amenities dropdown
-await page.getByRole('button', { name: 'Select amenities' }).click();
+  } // ✅ FOR LOOP ends here
 
-// Select Swimming Pool
-await page.getByText('Swimming Pool', { exact: true }).click();
+  console.log('✅ All Properties Added Successfully!');
 
-
-// Click Parking Type dropdown
-await page.getByText('Parking Type').click();
-
-// Select Surface Lot
-
-
-// Upload file
-await page.locator('input[type="file"]').nth(0).setInputFiles('./tests/files/property-image32.avif');
-await page.locator('input[type="file"]').nth(1).setInputFiles('./tests/files/owner-document.pdf');
-
-
-await page.getByRole('button', { name: 'Continue' }).click();
-
-await page.getByRole('button', { name: 'Add Unit' }).click();
-
-// Unit Name - text input (separate from number inputs)
-// Unit Name
-await page.locator('input[type="text"].q-field__native').first().fill(property.unitName);
-
-// Floor Number
-// Floor Number - use nth text input
-
-
-// All number inputs
-const numberInputs = page.locator('input[type="number"]:not([readonly])');
-
-
-await numberInputs.nth(0).pressSequentially(property.floorNumber);
-// Number of Bed Rooms
-await numberInputs.nth(1).pressSequentially(property.bedrooms);
-
-// Number of Bath Rooms
-await numberInputs.nth(2).pressSequentially(property.bathrooms);
-
-// Number of Full Bath Rooms
-await numberInputs.nth(3).pressSequentially(property.fullBathrooms);
-
-// Number of Half Bath Rooms
-await numberInputs.nth(4).pressSequentially(property.halfBathrooms);
-
-// Built Area in sq.ft
-await numberInputs.nth(5).pressSequentially(property.builtArea);
-
-// Monthly Rent
-await page.locator('input[type="number"][min="0"][step="1"]').nth(6).pressSequentially(property.rentAmount);
-
-// Owner Reserve Fund
-await page.locator('input[type="number"][min="0"][step="1"]').nth(8).pressSequentially(property.ownerReserveFund);
-
-// Low Price
-await page.locator('input[type="number"][min="0"][step="1"]').nth(9).pressSequentially(property.lowPrice);
-
-// High Price
-await page.locator('input[type="number"][min="0"][step="1"]').nth(10).pressSequentially(property.highPrice);
-
-await page.locator('textarea.q-field__native.q-placeholder').fill(property.unitDescription);
-
-await page.locator('input[type="number"][max="30"]').pressSequentially(property.lateFeePercentage);
-
-await page.locator('input[type="file"]').nth(0).setInputFiles('./tests/files/unit.jpg');
-
-await page.locator('input[type="file"]').nth(1).setInputFiles('./tests/files/floor.jpg');
-// Click Add button
-await page.locator('button.add-btn').click();
-await page.waitForTimeout(3000);
-
-await page.getByRole('button', { name: 'Save' }).click();
-
-await page.waitForTimeout(5000);
-
-await page.getByRole('tab', { name: 'Review' }).click();
-await page.waitForTimeout(1000);
-
-await page.locator('button.verify-btn-active').click();
-await page.waitForTimeout(1000);
-
-await page.locator('.q-card').getByRole('button', { name: 'Preview and Verify' }).click();
-await page.waitForTimeout(1000);
-
-await page.locator('button.verify-btn').click();
-await page.waitForTimeout(1000);
-
-
-await page.screenshot({
-  path: 'tests/screenshots/Addproperty.png',
-  fullPage: true
-});
 });

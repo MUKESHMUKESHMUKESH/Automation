@@ -1,8 +1,8 @@
 const { test, expect } = require('@playwright/test');
-test.setTimeout(180000); // ✅ Increase to 180 seconds
+test.setTimeout(700000); // ✅ Increase to 180 seconds
 const { loginAsManager } = require('../utils/login');
 const tenantData = require('../testdata/tenantdata');
-const tenant = tenantData[32];
+const tenant = tenantData[41];
 
 test('Manager → Tenant Onboarding Flow', async ({ page }) => {
 
@@ -48,6 +48,9 @@ await page.waitForTimeout(1000);
 
 // Click Submit button
 await page.locator('button.submit-btn').first().click();
+
+
+await page.waitForTimeout(2000);
 
 // One-time setup: login manually, then save storage state
 // node script:
@@ -179,36 +182,56 @@ await managerPage.evaluate((day) => {
 }, tomorrowDay);
 await managerPage.waitForTimeout(1000);
 
-// ✅ 2. Click Property Manager Name
+
+// ✅ 1. Click Property Manager Name
 await managerPage.locator('div[style*="cursor: pointer"]')
   .filter({ hasText: '[Property Manager Name]' })
   .click();
-await managerPage.waitForTimeout(800);
-await managerPage.waitForSelector('input[aria-label="Enter Value"]', { timeout: 10000 });
-const inputs = managerPage.locator('input[aria-label="Enter Value"]');
-const count = await inputs.count();
+await managerPage.waitForTimeout(500);
+let inputs = managerPage.locator('input[aria-label="Enter Value"]');
+let count = await inputs.count();
 await inputs.nth(count - 1).fill('Jaya Sudharsan');
+// ✅ Double click to confirm and remove validation error
+await inputs.nth(count - 1).dblclick();
 await managerPage.waitForTimeout(500);
 
-// ✅ 3. Click Company Type
+// ✅ Click outside
+await managerPage.mouse.click(700, 400);
+await managerPage.waitForTimeout(300);
+
+// ✅ 2. Click Company Type
 await managerPage.locator('div[style*="cursor: pointer"]')
   .filter({ hasText: '[Company Type]' })
   .click();
 await managerPage.waitForTimeout(500);
-const inputs2 = managerPage.locator('input[aria-label="Enter Value"]');
-const count2 = await inputs2.count();
-await inputs2.nth(count2 - 1).fill('Property Management');
+inputs = managerPage.locator('input[aria-label="Enter Value"]');
+count = await inputs.count();
+await inputs.nth(count - 1).fill('Property Management');
+// ✅ Double click to confirm
+await inputs.nth(count - 1).dblclick();
 await managerPage.waitForTimeout(500);
 
-// ✅ 4. Click Property Manager Address
+// ✅ Click outside
+await managerPage.mouse.click(700, 400);
+await managerPage.waitForTimeout(300);
+
+// ✅ 3. Click Property Manager Address
 await managerPage.locator('div[style*="cursor: pointer"]')
   .filter({ hasText: '[Property Manager Address]' })
   .click();
 await managerPage.waitForTimeout(500);
-const inputs3 = managerPage.locator('input[aria-label="Enter Value"]');
-const count3 = await inputs3.count();
-await inputs3.nth(count3 - 1).fill('205 Sunset Street, Denver, 80201');
+inputs = managerPage.locator('input[aria-label="Enter Value"]');
+count = await inputs.count();
+await inputs.nth(count - 1).fill('205 Sunset Street, Denver, 80201');
+// ✅ Double click to confirm
+await inputs.nth(count - 1).dblclick();
 await managerPage.waitForTimeout(500);
+
+// ✅ Click outside
+await managerPage.mouse.click(700, 400);
+await managerPage.waitForTimeout(300);
+
+
 
 // ✅ Scroll down to find date fields
 await managerPage.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
@@ -268,7 +291,9 @@ await managerPage.waitForTimeout(1000);
 
 
 // ✅ Navigate to correct month if different from current
-await managerPage.evaluate(async (targetMonth, targetYear) => {
+
+// ✅ Pass as single object instead of two arguments
+await managerPage.evaluate(async ({ targetMonth, targetYear }) => {
   let attempts = 0;
   while (attempts < 12) {
     const header = document.querySelector('.q-date__header-subtitle, .q-date__header-title');
@@ -278,8 +303,7 @@ await managerPage.evaluate(async (targetMonth, targetYear) => {
     await new Promise(r => setTimeout(r, 300));
     attempts++;
   }
-}, endMonth, endYear);
-await managerPage.waitForTimeout(500);
+}, { targetMonth: endMonth, targetYear: endYear }); // ✅ pass as object
 
 // ✅ Click end date using evaluate
 await managerPage.evaluate((day) => {
@@ -289,6 +313,163 @@ await managerPage.evaluate((day) => {
   }
 }, endDay);
 await managerPage.waitForTimeout(1000);
+
+
+await managerPage.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+await managerPage.waitForTimeout(500);
+
+
+
+// ✅ Create Lease
+await managerPage.getByRole('button', { name: 'Create Lease' }).click();
+await managerPage.waitForTimeout(10000);
+
+
+// ✅ Click the profile tab in sidebar
+await managerPage.locator('.q-item:has(.q-avatar__content img)').click();
+console.log('✅ Profile tab clicked!');
+
+// ✅ Wait for dropdown card to appear
+
+
+await managerPage.locator('.q-item.text-negative:has(i.material-icons:text("logout"))').click();
+
+await managerPage.waitForSelector('.logout-card', { state: 'visible' });
+await managerPage.waitForTimeout(1000);
+
+// ✅ Step 5: Confirm Logout
+await managerPage.locator('.logout-card .btn-logout').click();
+
+await managerPage.waitForTimeout(5000);
+console.log('✅ Logout confirmed!');
+
+
+ await managerPage.locator('input[name="username"]').fill(tenant.username);
+  await managerPage.locator('input[name="password"]').fill(tenant.password);
+  await managerPage.getByRole('button', { name: 'Login' }).click();
+
+  await managerPage.waitForTimeout(10000);
+
+   await managerPage.getByRole('button', { name: 'Sign Lease' }).click();
+
+   await managerPage.waitForTimeout(5000);
+
+  
+await managerPage.waitForLoadState('networkidle');
+
+// Scroll down to the bottom of the lease document
+// Scroll inside the lease document iframe or inner container
+// Scroll down inside the lease document
+await managerPage.keyboard.press('End');
+await managerPage.waitForTimeout(2000);
+
+// Or use mouse wheel to scroll down
+await managerPage.mouse.wheel(0, 7100);
+await managerPage.waitForTimeout(2000);
+
+
+await managerPage.locator('[data-field-name="tenant_signature"]').click();
+
+await managerPage.locator('input[placeholder="Enter first name"]').fill(tenant.firstName);
+await managerPage.locator('input[placeholder="Enter last name"]').fill(tenant.lastName);
+
+await managerPage.locator('button.submit-btn').click();
+await managerPage.waitForTimeout(2000);
+
+// Click the sign date field
+await managerPage.locator('[data-field-name="tenant_sign_date"]').click();
+
+// Click the calendar icon
+await managerPage.locator('i.material-icons').filter({ hasText: 'event' }).click();
+
+// Select today's date
+const today = new Date();
+const day = today.getDate().toString();
+await managerPage.locator('.q-date__calendar-item--in button').filter({ hasText: day }).first().click();
+
+// Confirm selection
+
+// Click Upload Lease
+await managerPage.locator('span.block', { hasText: 'Upload Lease' }).click();
+
+await managerPage.waitForTimeout(5000);
+
+// Click Logout
+await managerPage.locator('span.text-h7', { hasText: 'Log Out' }).click();
+
+await managerPage.locator('.q-card').getByRole('button', { name: 'OK' }).click();
+
+// Wait for loader to disappear
+await managerPage.locator('.custom-loader-container').waitFor({ state: 'hidden', timeout: 10000 });
+
+await managerPage.locator('input[name="username"]').fill('manager');
+await managerPage.locator('input[name="password"]').fill('Manager@123');
+
+// Wait for loader again before clicking
+await managerPage.locator('.custom-loader-container').waitFor({ state: 'hidden', timeout: 10000 });
+await managerPage.getByRole('button', { name: 'Login' }).click();
+// ✅ Wait for dashboard on managerPage
+
+// ✅ All subsequent actions on managerPage
+await managerPage.locator('.lucide-chevron-down').nth(2).click();
+
+const manageLeaseBtn1 = managerPage.getByRole('button', { name: 'Manage Lease' });
+await manageLeaseBtn.waitFor({ state: 'visible', timeout: 10000 });
+await managerPage.waitForTimeout(400);
+await manageLeaseBtn.click();
+
+await managerPage.waitForTimeout(2000);
+
+await managerPage.locator('i.q-icon.material-icons:has-text("chevron_right")').first().click();
+
+
+
+// ✅ Wait for button to exist first
+await managerPage.waitForSelector('button', { timeout: 15000 });
+
+// ✅ Scroll into view and click in one go
+await managerPage.getByRole('button', { name: 'Activate Lease' }).click();
+await managerPage.waitForTimeout(2000);
+
+await managerPage.locator('.q-dialog-plugin').getByRole('button', { name: 'Proceed to Sign' }).click();
+  
+await managerPage.waitForLoadState('networkidle');
+
+// scrolling in Manager Lease Document
+await managerPage.keyboard.press('End');
+await managerPage.waitForTimeout(2000);
+
+// Or use mouse wheel to scroll down
+await managerPage.mouse.wheel(0, 7100);
+await managerPage.waitForTimeout(2000);
+
+
+await managerPage.locator('[data-field-name="manager_signature"]').click();
+
+await managerPage.locator('input[placeholder="Enter first name"]').fill('Jeyasudhrasun');
+await managerPage.locator('input[placeholder="Enter last name"]').fill('S');
+
+await managerPage.locator('button.submit-btn').click();
+
+
+// Click the sign date field
+await managerPage.locator('[data-field-name="manager_sign_date"]').click();
+
+// Click the calendar icon
+await managerPage.locator('i.material-icons').filter({ hasText: 'event' }).click();
+
+// Select today's date
+const today_tenant = new Date();
+const day_tenant = today.getDate().toString();
+await managerPage.locator('.q-date__calendar-item--in button').filter({ hasText: day }).first().click();
+
+// Confirm selection
+
+// Click Upload Lease
+await managerPage.locator('span.block', { hasText: 'Activate Lease' }).click();
+
+await managerPage.waitForTimeout(2000);
+
 
 // Now fill the registration form
   // 8. Screenshot
