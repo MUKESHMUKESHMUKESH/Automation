@@ -2,8 +2,8 @@ const { test, expect } = require('@playwright/test');
 test.setTimeout(700000); // ✅ Increase to 180 seconds
 const { loginAsManager } = require('../utils/login');
 const tenantData = require('../testdata/tenantdata');
-const tenant = tenantData[0];
-
+const tenant = tenantData[1];
+  
 test('Manager → Tenant Onboarding Flow', async ({ page }) => {
 
   // 1. Open application
@@ -48,6 +48,22 @@ await page.waitForTimeout(1000);
 
 // Click Submit button
 await page.locator('button.submit-btn').first().click();
+await page.waitForTimeout(10000);
+
+  const profileItem = page.locator('.q-item', { hasText: 'jaya sudharsan' });
+  await profileItem.waitFor({ state: 'visible', timeout: 10000 });
+  await profileItem.click();
+
+  // Step 8: Click "Logout" menu item to open confirmation dialog
+  await page.locator('.q-item__section--main', { hasText: 'Logout' }).click();
+
+  // Step 9: Wait for confirmation dialog and click the actual Logout button
+  await page.waitForSelector('.logout-card');
+  await Promise.all([
+    page.waitForURL('**/#/login**', { timeout: 60000 }),
+    page.locator('.logout-card .btn-logout').click(),
+    
+  ]);
 
 
 await page.waitForTimeout(2000);
@@ -57,7 +73,7 @@ await page.waitForTimeout(2000);
 const { getOnboardingLink } = require('../utils/gmail');
 
 // ... after Submit button click ...
-await page.waitForTimeout(10000);
+await page.waitForTimeout(30000);
 
 const onboardingLink = await getOnboardingLink();
 console.log('Registration Link:', onboardingLink);
@@ -87,13 +103,40 @@ await formPage.waitForSelector('button.add-btn:not([disabled])', { timeout: 1000
 await formPage.locator('button.add-btn').click();
 
 // Upload first file
-await formPage.locator('input[type="file"]').nth(0).setInputFiles(tenant.document1);
+// Document 1 - Address Proof
+await formPage.locator('input.q-field__native[placeholder="XXX-XX-XXXX"]').click();
+await formPage.waitForTimeout(500);
+await formPage.locator('input.q-field__native[placeholder="XXX-XX-XXXX"]').pressSequentially(tenant.ssn, { delay: 150 });
+await formPage.waitForTimeout(500);
+console.log('✅ SSN filled!');
 
-// Upload second file
-// Upload ID Proof - find the "Choose file" link near ID Proof label
-await formPage.locator('div').filter({ hasText: /^ID Proof/ }).locator('input[type="file"]').setInputFiles(tenant.document2);
+// ✅ Document 1 - Address Proof
+await formPage.locator('div').filter({ hasText: /^Address Proof/ })
+  .locator('input[type="file"]').setInputFiles(tenant.document1);
+await formPage.waitForTimeout(1000);
+console.log('✅ Address Proof uploaded!');
 
-await formPage.locator('button.add-btn').click();
+// ✅ Document 2 - ID Proof
+await formPage.locator('div').filter({ hasText: /^ID Proof/ })
+  .locator('input[type="file"]').setInputFiles(tenant.document1);
+await formPage.waitForTimeout(1000);
+console.log('✅ ID Proof uploaded!');
+
+// ✅ Document 3 - Tax Report
+await formPage.locator('div').filter({ hasText: /^Proof Of Tax ID\/SSN/ })
+  .locator('input[type="file"]').setInputFiles(tenant.document1);
+await formPage.waitForTimeout(1000);
+console.log('✅ Tax Report uploaded!');
+
+// ✅ Document 4 - Credit Report
+await formPage.locator('div').filter({ hasText: /^Credit Report/ })
+  .locator('input[type="file"]').setInputFiles(tenant.document1);
+await formPage.waitForTimeout(1000);
+console.log('✅ Credit Report uploaded!');
+
+await formPage.getByRole('button', { name: 'Next' }).click();
+console.log('✅ Add button clicked!');
+await formPage.waitForTimeout(3000);
 // Fill username
 await formPage.locator('input[name="username"]').fill(tenant.username);
 
@@ -105,6 +148,8 @@ await formPage.locator('input[name="password"]').fill(tenant.password);
 await formPage.locator('input[type="password"]').nth(1).fill(tenant.confirmPassword);
 await formPage.getByRole('button', { name: 'Create' }).click();
 await formPage.waitForTimeout(10000);
+
+await formPage.close();
 
 // ─── Re-login as Manager ───────────────────────────────────────────────────
 // ─── Re-login as Manager ───────────────────────────────────────────────────
@@ -348,7 +393,7 @@ console.log('✅ Logout confirmed!');
   await managerPage.locator('input[name="password"]').fill(tenant.password);
   await managerPage.getByRole('button', { name: 'Login' }).click();
 
-  await managerPage.waitForTimeout(10000);
+  await managerPage.waitForTimeout(20000);
 
    await managerPage.getByRole('button', { name: 'Sign Lease' }).click();
 
@@ -382,10 +427,14 @@ await managerPage.locator('[data-field-name="tenant_sign_date"]').click();
 // Click the calendar icon
 await managerPage.locator('i.material-icons').filter({ hasText: 'event' }).click();
 
-// Select today's date
 const today = new Date();
 const day = today.getDate().toString();
-await managerPage.locator('.q-date__calendar-item--in button').filter({ hasText: day }).first().click();
+
+// Use exact match instead of substring match
+await managerPage
+  .locator('.q-date__calendar-item--in button')
+  .filter({ hasText: new RegExp(`^${day}$`) })
+  .click();
 
 // Confirm selection
 

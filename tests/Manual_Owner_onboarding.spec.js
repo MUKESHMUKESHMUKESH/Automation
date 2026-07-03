@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const ownerdata = require('../testdata/ownerdata');
 
-const owner = ownerdata[11];
+const owner = ownerdata[5];
 const path = require('path');
 
 test.setTimeout(300000);
@@ -9,7 +9,7 @@ test.setTimeout(300000);
 test('Manager → Add Owner', async ({ page }) => {
 
   // Open application
-  await page.goto('https://rentgeniux.onrender.com/#/login');
+   await page.goto('https://rentgeniux.onrender.com/#/login');
 
   // Login
   await page.locator('input[name="username"]').fill('manager');
@@ -17,7 +17,7 @@ test('Manager → Add Owner', async ({ page }) => {
   await page.getByRole('button', { name: 'Login' }).click();
 
   // Wait for Manager Dashboard
-  await page.waitForURL('**/manager');
+  
   await page.waitForLoadState('networkidle');
 
   // Click Owners menu
@@ -97,8 +97,7 @@ await page.locator('input[type="file"]').nth(3).setInputFiles(owner.document4);
 
 
 // ✅ Click enabled Next button (data-v-b16f8748)
-await expect(page.locator('button[data-v-b16f8748]:has(span.block:text("Next"))')).toBeEnabled({ timeout: 10000 });
-await page.locator('button[data-v-b16f8748]:has(span.block:text("Next"))').click();
+await page.getByRole('button', { name: 'Next' }).click();
 console.log('✅ Next button clicked!');
 await page.waitForTimeout(5000);
 
@@ -147,7 +146,7 @@ await page.locator('.logout-card .btn-logout').click();
 
 await page.waitForTimeout(5000);
 console.log('✅ Logout confirmed!');
-
+await page.goto('https://rentgeniux.onrender.com/#/login');
   await page.locator('input[name="username"]').fill(owner.username);
   await page.locator('input[name="password"]').fill(owner.password);
   await page.getByRole('button', { name: 'Login' }).click();
@@ -166,79 +165,222 @@ await page.getByRole('button', { name: 'Add Properties' }).click();
     await page.locator('input[type="text"]').first().fill(owner.propertyName);
     console.log('✅ Property Name filled!');
     
+
     await page.locator('input[role="combobox"]').nth(0).click();
-   await page.waitForSelector('[role="option"]');
-    await page.getByText('House', { exact: true }).click();
-    console.log('✅ Property Type selected!');
+        await page.waitForSelector('[role="option"]', { state: 'visible' });
+        await page.getByText('House', { exact: true }).click();
+        await page.waitForTimeout(500);
+        console.log('✅ House selected!');
 
     // ✅ Year Built
     await page.locator('input[type="number"]').nth(0).fill(owner.yearBuilt);
-    console.log('✅ Year Built filled!');
+       console.log('✅ Year Built filled!');
 
-    // ✅ Furnishing Status Dropdown
-await page.locator('.q-field__native').filter({ has: page.locator('input[role="combobox"]') }).first().click();
-await page.waitForSelector('[role="option"]', { state: 'visible' });
-await page.locator('[role="option"]').first().click({ force: true });
-console.log('✅ Dropdown selected!');
+          // ✅ Furnishing Status Dropdown
+          // Furnishing Status is the 2nd combobox (index 1)
+      await page.locator('input[role="combobox"]').nth(1).click();
+      await page.waitForSelector('[role="option"]', { state: 'visible' });
+      await page.getByText('Unfurnished', { exact: true }).click();
+      await page.waitForTimeout(500);
+      console.log('✅ Furnishing Status selected!');
+
+      await page.locator('textarea[rows="6"]').nth(0).fill(owner.description);
+      await page.waitForTimeout(500);
+      console.log('✅ Description filled!');
 
     // ✅ Address
-    await page.locator('input[type="search"][role="combobox"]').fill(owner.address);
-    await page.waitForTimeout(1000);
-    console.log('✅ Address filled!');
+          // Type "ad" in Search Address field
+        await page.locator('input[placeholder="Search Address"]').fill('ad');
+        await page.waitForTimeout(2000);
 
-    // ✅ City
-    await page.locator('input[type="text"]').nth(1).fill(owner.city);
-    console.log('✅ City filled!');
-
-    // ✅ Country
-    await page.locator('input[placeholder="Enter country"]').fill(owner.country);
-    console.log('✅ Country filled!');
-
-    // ✅ State Dropdown
-    await page.locator('input[role="combobox"]').last().click();
-    await page.waitForSelector('[role="option"]');
-    await page.waitForTimeout(1000);
-    await page.locator('[role="option"]').first().click();
-    await page.waitForTimeout(1000);
-    console.log('✅ State selected!');
-
-    // ✅ City Name
-    await page.getByPlaceholder('Enter city name').fill(owner.city);
-    console.log('✅ City Name filled!');
-
-    // ✅ State
-    await page.locator('input[placeholder="Enter state"]').fill(owner.state);
-    console.log('✅ State filled!');
-
-    // ✅ Zip Code
-    await page.locator('input[placeholder="Enter zipcode"]').fill(owner.zipCode);
-    console.log('✅ Zip Code filled!');
-
-    // ✅ Description
-    await page.locator('textarea[placeholder="Enter property description"]').fill(owner.comments);
-    console.log('✅ Description filled!');
+        // Select first option from dropdown
+        await page.locator('[role="option"]').first().click({ force: true });
+        await page.waitForTimeout(500);
+        console.log('✅ Address selected!');
 
     // ✅ Amenities
-    await page.getByRole('button', { name: 'Select amenities' }).click();
-    await page.getByText('Swimming Pool', { exact: true }).click();
-    console.log('✅ Amenities selected!');
-
-    // ✅ Parking Type
-    await page.getByText('Parking Type').click();
-    console.log('✅ Parking Type clicked!');
+  
+          
+      await page.getByRole('button', { name: 'Select amenities' }).click();
+        await page.getByText('Swimming Pool', { exact: true }).click();
+        console.log('✅ Amenities selected!');
+        // ✅ Parking Type
+        await page.getByText('Select parking type').click();
+        await page.getByText('Garage Lot', { exact: true }).click();
+        console.log('✅ Parking Type clicked!');
 
     // ✅ Upload Property Files
-    await page.locator('input[type="file"]').nth(0).setInputFiles('./tests/files/property-image32.avif');
+    await page.locator('input[type="file"]').nth(0).setInputFiles('./tests/files/property1.jfif');
     await page.locator('input[type="file"]').nth(1).setInputFiles('./tests/files/owner-document.pdf');
+
+    await page.waitForTimeout(1000);
     console.log('✅ Property files uploaded!');
 
     // ✅ Continue to Unit
     await page.getByRole('button', { name: 'Continue' }).click();
     console.log('✅ Continue clicked!');
 
+  
+              // ✅ Wait for Unit Details page
+          await page.waitForSelector('text=Unit Details', { state: 'visible', timeout: 15000 });
+          await page.waitForTimeout(2000);
+          console.log('✅ Unit Details page loaded!');
+
+          // ✅ Click Add Unit button
+          await page.getByRole('button', { name: 'Add Unit' }).click();
+          await page.waitForTimeout(2000);
+          console.log('✅ Add Unit clicked!');
+          
+          // ✅ Unit Name
+          await page.locator('input[type="text"].q-field__native').last().fill(owner.unitName);
+          await page.waitForTimeout(500);
+          console.log('✅ Unit Name filled!');
+
+          // ✅ Floor Number
+          await page.locator('input[type="number"].q-field__native:visible').nth(0).fill(owner.floorNumber);
+          await page.waitForTimeout(500);
+          console.log('✅ Floor Number filled!');
+
+          // ✅ Bed Rooms
+          await page.locator('input[type="number"].q-field__native:visible').nth(1).fill(owner.Bedrooms);
+          await page.waitForTimeout(500);
+          console.log('✅ Bedrooms filled!');
+
+          // ✅ Bath Rooms
+          await page.locator('input[type="number"].q-field__native:visible').nth(2).fill(owner.Bathrooms);
+          await page.waitForTimeout(500);
+          console.log('✅ Bathrooms filled!');
+
+          // ✅ Full Bath Rooms
+          await page.locator('input[type="number"].q-field__native:visible').nth(3).fill(owner.fullBathrooms);
+          await page.waitForTimeout(500);
+          console.log('✅ Full Bathrooms filled!');
+
+          // ✅ Half Bath Rooms
+          await page.locator('input[type="number"].q-field__native:visible').nth(4).fill(owner.halfBathrooms);
+          await page.waitForTimeout(500);
+          console.log('✅ Half Bathrooms filled!');
+
+          // ✅ Square Feet
+          await page.locator('input[type="number"].q-field__native:visible').nth(5).fill(owner.builtArea);
+          await page.waitForTimeout(500);
+          console.log('✅ Square Feet filled!');
+
+          // ✅ Scroll to Rent Details
+          await page.locator('text=Rent Details').scrollIntoViewIfNeeded();
+          await page.waitForTimeout(1000);
+          console.log('✅ Scrolled to Rent Details!');
+
+          // ✅ Monthly Rent
+          await page.locator('input[type="number"].q-field__native:visible').nth(6).fill(owner.rentAmount);
+          await page.waitForTimeout(500);
+          console.log('✅ Monthly Rent filled!');
+
+          // ✅ Low Price
+          await page.locator('input[type="number"].q-field__native:visible').nth(7).fill(owner.lowPrice);
+          await page.waitForTimeout(500);
+          console.log('✅ Low Price filled!');
+
+          // ✅ High Price
+          await page.locator('input[type="number"].q-field__native:visible').nth(8).fill(owner.highPrice);
+          await page.waitForTimeout(500);
+          console.log('✅ High Price filled!');
+
+          // rows="6" is Property Description, rows="4" is Unit Description
+          await page.locator('textarea[rows="4"]').last().fill(owner.unitDescription);
+          await page.waitForTimeout(500);
+          console.log('✅ Unit Description filled!');
+
+          // ✅ If multiple file inputs exist
+            // ✅ Unit Image (first upload-area)
+           // ✅ Unit Images - JPG/JPEG/PNG only
+               // Unit Image
+        await page.locator('input[type="file"]').nth(2)
+            .setInputFiles('./tests/files/property2.jpg');
+            await page.waitForTimeout(1000);
+
+        // Floor Plan
+        await page.locator('input[type="file"]').nth(3)
+            .setInputFiles('./tests/files/property2.jpg');
+        await page.waitForTimeout(1500);
+          // ✅ Submit Unit
+          await page.getByRole('button', { name: 'Add' }).click();
+          await page.waitForTimeout(2000);
+          console.log('✅ Unit Saved!');
+
+          await page.getByRole('button', { name: 'Save', exact: true }).click();
+          await page.waitForTimeout(5000);
+          console.log('✅ Unit Saved!');
+
+        
+          await page.locator('input[name="username"]').fill('manager');
+          await page.locator('input[name="password"]').fill('Manager@123');
+          await page.getByRole('button', { name: 'Login' }).click();
+        await page.waitForTimeout(1000);
+                      
+            await page.locator('button.nav-btn').filter({ hasText: 'Properties' }).click();
+          await page.waitForTimeout(1000);
+          await page.locator('button.submenu-btn').filter({ hasText: 'Manage Properties' }).click();
+          await page.waitForLoadState('networkidle');
+          
+          await page.locator('div.q-tab__label:has-text("Review")').click();
+          await page.waitForTimeout(1000);
+          console.log('✅ Review tab clicked!');
+          await page.locator('input[placeholder="Search"]').fill(owner.propertyName);
+            await page.waitForTimeout(1000);
+            console.log('✅ Property searched!');
+
+            await page.locator('i.material-icons:has-text("more_vert")').click();
+            await page.waitForTimeout(500);
+            console.log('✅ More options clicked!');
+
+            await page.locator('span.text-default:has-text("Edit")').click();
+            await page.waitForTimeout(1000);
+            console.log('✅ Edit clicked!');
+
+            await page.locator('span.gt-xs:has-text("Property Details")').click();
+            await page.waitForTimeout(1000);
+            console.log('✅ Property Details clicked!');
+
+             await page.locator('i.q-select__dropdown-icon').first().click();
+            await page.waitForSelector('[role="option"]', { state: 'visible' });
+            await page.getByText('Verified', { exact: true }).click();
+            await page.waitForTimeout(500);
+            console.log('✅ Verified selected!');
 
 
+            await page.locator('span.gt-xs:has-text("Unit Name")').click();
+            await page.waitForTimeout(1000);
+            console.log('✅ Unit Name tab clicked!');
 
+
+            await page.locator('span.block:has-text("Edit")').click();
+            await page.waitForTimeout(1000);
+            console.log('✅ Edit clicked!');
+                   
+              await page.locator('.q-radio').nth(1).click();
+          await page.waitForTimeout(500);
+          console.log('✅ Second radio button selected!');
+
+          await page.locator('input[type="number"][max="50"]').fill('10');
+          await page.waitForTimeout(500);
+          console.log('✅ Field filled!');
+
+           await page.locator('input[type="number"].q-field__native:visible').nth(8).fill('100');
+            await page.waitForTimeout(500);
+            console.log('✅ Owner Reserve Fund filled!');
+
+                await page.locator('input[type="number"][max="30"]').pressSequentially('20', { delay: 100 });
+                await page.waitForTimeout(500);
+                console.log('✅ Late Fee filled!');
+
+                 await page.getByRole('button', { name: 'Update' }).click();
+                    await page.waitForTimeout(5000);
+                    console.log('✅ Saved!');
+
+                    await page.getByRole('button', { name: 'Save', exact: true }).click();
+                    await page.waitForTimeout(2000);
+                    console.log('✅ Save clicked!');
   // ✅ Screenshot
   /*console.log('Taking screenshot...');
   await page.screenshot({
@@ -248,3 +390,5 @@ console.log('✅ Dropdown selected!');
   console.log('✅ Screenshot saved!');*/
 
 });
+
+

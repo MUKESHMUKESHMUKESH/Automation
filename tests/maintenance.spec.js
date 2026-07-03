@@ -59,11 +59,30 @@ await page.waitForTimeout(1000);
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
 const tomorrowDate = tomorrow.getDate().toString();
+const tomorrowMonth_q = tomorrow.getMonth();
+const todayMonth = new Date().getMonth();
 
-await page.locator('.q-date__calendar-item button').filter({ hasText: tomorrowDate }).click();
+// Open date picker
+await page.waitForSelector('.q-date__calendar-item', { state: 'visible' });
+await page.waitForTimeout(500);
+
+// If tomorrow falls in next month, click the next arrow first
+if (tomorrowMonth_q !== todayMonth) {
+  await page.locator('i.material-icons:has-text("chevron_right")').nth(0).click();
+  await page.waitForTimeout(500);
+  console.log('✅ Navigated to next month!');
+}
+
+// Click the date (exact match to avoid matching 10, 21, etc.)
+await page.locator('.q-date__calendar-item button')
+  .filter({ hasText: new RegExp(`^${tomorrowDate}$`) })
+  .click();
+await page.waitForTimeout(500);
+console.log('✅ Tomorrow date selected!');
 
 await page.locator('i.q-select__dropdown-icon').nth(3).click();
 await page.getByRole('option', { name: /morning/i }).click();
+console.log('✅ Morning slot selected!');
 
 // Or by first option
 await page.locator('i.q-select__dropdown-icon').nth(2).click();
@@ -164,13 +183,29 @@ await page.locator('i.q-icon.material-icons.cursor-pointer').click();
 await page.waitForTimeout(1000);
 
 // Click tomorrow's date
-const tomorrow2 = new Date();
+// ✅ Fix variable name (tomorrow2 vs tomorrow)
+const tomorrow_invoice = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
 const tomorrowDate1 = tomorrow.getDate().toString();
+const tomorrowMonth = tomorrow.getMonth(); // 0-indexed
+const currentMonth = new Date().getMonth();
 
-await page.locator('.q-date__calendar-item button').filter({ hasText: tomorrowDate1 }).click();
+console.log('Tomorrow date:', tomorrowDate1);
 
-await page.waitForTimeout(2000);
+// ✅ If tomorrow is in next month, click next arrow
+if (tomorrowMonth !== currentMonth) {
+  await page.locator('.q-date__arrow').nth(1).click(); // click ">" next month
+  await page.waitForTimeout(500);
+  console.log('✅ Navigated to next month!');
+}
+
+// ✅ Now click the date
+await page.locator('.q-date__calendar-item button')
+  .filter({ hasText: new RegExp(`^${tomorrowDate1}$`) })
+  .click();
+await page.waitForTimeout(500);
+console.log('✅ Tomorrow date selected!');
+await page.waitForTimeout(3000);
 
 await page.getByRole('button', { name: 'Generate Invoice' }).click();
 

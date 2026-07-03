@@ -12,8 +12,8 @@ test('Owner → Add Property Flow', async ({ page }) => {
   console.log('✅ Application Opened!');
 
   // ✅ Step 2: Login
-  await page.locator('input[name="username"]').fill('sophiakens');
-  await page.locator('input[name="password"]').fill('Sophia@456');
+  await page.locator('input[name="username"]').fill('Malik');
+  await page.locator('input[name="password"]').fill('M@456');
   await page.getByRole('button', { name: 'Login' }).click();
   await page.waitForTimeout(3000);
   console.log('✅ Login Successful!');

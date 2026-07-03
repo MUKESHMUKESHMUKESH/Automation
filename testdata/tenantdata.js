@@ -1,19 +1,70 @@
 module.exports = [
   
 {
-  firstName: "Raymond",
-  lastName: "Fletcher",
-  email: "harshath2912+342@gmail.com",
-  phone: "4482613789",
-  gmailEmail: "harshath2912+142@gmail.com",
-  emergencyContact: "3382613789",
-  address: "56 Maplewood Drive",
+  firstName: "Nathan",
+  lastName: "Brooks",
+  email: "harshath2912+742@gmail.com",
+  phone: "6603827416",
+  gmailEmail: "harshath2912+143@gmail.com",
+  emergencyContact: "4493827416",
+  address: "84 Cedar Ridge Avenue",
+  document1: "./tests/files/owner-document.jfif",
+  document2: "./tests/files/owner-document.pdf",
+  username: "nathanbrooks",
+  password: "Nathan@123",
+  ssn:"909645231",
+  confirmPassword: "Nathan@123"
+},
+{
+  firstName: "Jasfer",
+  lastName: "Jaher",
+  email: "harshath2912+849@gmail.com",
+  phone: "7706145397",
+  gmailEmail: "harshath2912+145@gmail.com",
+  emergencyContact: "7726147593",
+  address: "315 Birchwood Circle",
+  document1: "./tests/files/owner-document.jfif",
+  document2: "./tests/files/owner-document.pdf",
+  username: "Jasfer",
+  password: "Jasfer@123",
+  ssn: "927791357",
+  confirmPassword: "Jasfer@123"
+},
+{
+  firstName: "Vincent",
+  lastName: "Hartley",
+  email: "harshath2912+343@gmail.com",
+  phone: "5593724890",
+  gmailEmail: "harshath2912+143@gmail.com",
+  emergencyContact: "4493724890",
+  address: "89 Oakridge Avenue",
   document1: "./tests/files/owner-document.jfif",
   document2: "./tests/files/owner-document.jfif",
-  username: "raymondflet",
-  password: "Raymond@123",
-  confirmPassword: "Raymond@123"
+  username: "vincenthart",
+  password: "Vincent@123",
+  confirmPassword: "Vincent@123"
 },
+
+
+{
+  firstName: "Shakul",
+  lastName: "Ahamad",
+  email: "harshath2912+372@gmail.com",
+  phone: "6614835123",
+  gmailEmail: "harshath2912+144@gmail.com",
+  emergencyContact: "5514835901",
+  ssn : "787534258",
+  address: "112 Sycamore Street",
+  document1: "./tests/files/owner-document.jfif",
+  document2: "./tests/files/owner-document.jfif",
+  document3: "./tests/files/Tax_Report.pdf",
+  document3: "./tests/files/ID_Proof.pdf",
+  username: "Ahamad",
+  password: "Ahamad@123",
+  confirmPassword: "Ahamad@123"
+},
+
+
 {
   firstName: "Scarlett",
   lastName: "J",

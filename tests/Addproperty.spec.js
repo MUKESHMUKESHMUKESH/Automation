@@ -6,7 +6,7 @@ test.setTimeout(600000); // 10 minutes for bulk
 test('Manager → Navigate to Add Property', async ({ page }) => {
 
   // ✅ Login ONCE
-  await page.goto('https://dev-rentgeniux.onrender.com/#/login');
+  await page.goto('https://rentgeniux.onrender.com/#/login');
   await page.locator('input[name="username"]').fill('manager');
   await page.locator('input[name="password"]').fill('Manager@123');
   await page.getByRole('button', { name: 'Login' }).click();
@@ -24,7 +24,7 @@ test('Manager → Navigate to Add Property', async ({ page }) => {
     await page.waitForLoadState('networkidle');
 
       for (let i = 0; i < propertyData.length; i++) {
-    const property = propertyData[i];
+    const property = propertyData[0];
     console.log(`\n🔄 Adding Property ${i + 1}/${propertyData.length}: ${property.propertyName}`);
     // ✅ Click Add Property
     await page.locator('div.text-black.text-weight-medium', { hasText: 'Add Property' }).click();
@@ -78,12 +78,7 @@ test('Manager → Navigate to Add Property', async ({ page }) => {
     console.log('✅ Country filled!');
 
     // ✅ State Dropdown
-    await page.locator('input[role="combobox"]').last().click();
-    await page.waitForSelector('[role="option"]');
-    await page.waitForTimeout(1000);
-    await page.locator('[role="option"]').first().click();
-    await page.waitForTimeout(1000);
-    console.log('✅ State selected!');
+
 
     // ✅ City Name
     await page.getByPlaceholder('Enter city name').fill(property.city);
@@ -107,12 +102,14 @@ test('Manager → Navigate to Add Property', async ({ page }) => {
     console.log('✅ Amenities selected!');
 
     // ✅ Parking Type
-    await page.getByText('Parking Type').click();
-    console.log('✅ Parking Type clicked!');
-
+        await page.locator('span.ellipsis:has-text("Select parking type")').click();
+        await page.waitForTimeout(1000);
+        await page.getByText('Garage Lot', { exact: true }).click();
+        await page.waitForTimeout(500);
+        console.log('✅ Parking Type - Garage Lot selected!');
     // ✅ Upload Property Files
-    await page.locator('input[type="file"]').nth(0).setInputFiles('./tests/files/property-image32.avif');
-    await page.locator('input[type="file"]').nth(1).setInputFiles('./tests/files/owner-document.pdf');
+    await page.locator('input[type="file"]').nth(0).setInputFiles(property.property_image);
+    await page.locator('input[type="file"]').nth(1).setInputFiles(property.property_doc);
     console.log('✅ Property files uploaded!');
 
     // ✅ Continue to Unit
