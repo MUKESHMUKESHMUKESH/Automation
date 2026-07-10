@@ -8,7 +8,7 @@ test('Manager → Navigate to Add Property', async ({ page }) => {
   // ✅ Login ONCE
   await page.goto('https://rentgeniux.onrender.com/#/login');
   await page.locator('input[name="username"]').fill('manager');
-  await page.locator('input[name="password"]').fill('Manager@123');
+  await page.locator('input[name="password"]').fill('Managerd@123');
   await page.getByRole('button', { name: 'Login' }).click();
   await page.waitForURL('**/manager');
   await page.waitForLoadState('networkidle');

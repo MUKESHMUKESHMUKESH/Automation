@@ -30,7 +30,7 @@ test('Manager → Tenant Inspection Flow', async ({ page }) => {
     await page.waitForTimeout(2000);
 
     // ✅ Click and type in Select a Tenant field
-        await page.locator('input[placeholder="Select a Tenant"]').fill('Nandha M');
+        await page.locator('input[placeholder="Select a Tenant"]').fill('Daniel');
 
         await page.waitForTimeout(1000);
 
