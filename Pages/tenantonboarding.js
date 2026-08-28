@@ -1,17 +1,29 @@
+const { LoginPage } = require('../Pages/Manager_Login');
 class TenantOnboardingPage {
   constructor(page) {
     this.page = page;
+    this.perfResults = [];
+  }
+
+  // Reusable timing helper — wraps any block and records duration
+  async measureStep(label, actionFn) {
+    const start = Date.now();
+    await actionFn();
+    const duration = Date.now() - start;
+    this.perfResults.push({ step: label, durationMs: duration });
+    console.log(`⏱ ${label}: ${duration}ms`);
+  }
+
+  printReport() {
+    console.table(this.perfResults);
+    fs.writeFileSync('perf-report-tenant-onboarding.json', JSON.stringify(this.perfResults, null, 2));
   }
 
   async addTenant(tenant) {  
   const page = this.page;   // .ADD THIS LINE
    // 1. Open application
-  await page.goto('https://rentgeniux.onrender.com');
-
-  // 2. Login 
-  await page.locator('input[name="username"]').fill('manager');
-  await page.locator('input[name="password"]').fill('Manager@123');
-  await page.getByRole('button', { name: 'Login' }).click();
+   const loginPage = new LoginPage(page);
+    await loginPage.login();
 
   // 3. Wait for dashboard
   await page.waitForURL('**/manager');
@@ -28,8 +40,8 @@ await page.locator('.lucide-chevron-down').nth(2).click();
   await page.locator('.property-card-content').first().click();
    await page.waitForTimeout(2000);
 
-   await page.getByRole('button', { name: 'Assign Property' }).nth(0).click();
-   await page.waitForTimeout(2000);
+   /*await page.getByRole('button', { name: 'Assign Property' }).nth(0).click();
+   await page.waitForTimeout(2000);*/
 
 // Fill First Name
 await page.locator('input[placeholder="First Name"]').first().fill(tenant.firstName);
@@ -53,7 +65,7 @@ await page.waitForTimeout(30000);
 // Open the profile menu/dropdown first
 
   // Step 8: Click "Logout" menu item to open confirmation dialog
-   await page.locator('.q-avatar__content').click();
+   await page.locator('.q-item__label--caption', { hasText: 'Property Manager' }).click();
     await page.waitForTimeout(500);
 
     // Click the profile item (first item in dropdown, name-agnostic)
@@ -75,7 +87,10 @@ await page.waitForTimeout(30000);
 const { getOnboardingLink } = require('../utils/gmail');
 
 // ... after Submit button click ...
-await page.waitForTimeout(3000);
+await page.waitForTimeout(10000);
+
+// Assumes you're already logged into Gmail in this browser context
+
 
 const onboardingLink = await getOnboardingLink();
 console.log('Registration Link:', onboardingLink);
@@ -149,7 +164,7 @@ await formPage.locator('input[name="password"]').fill(tenant.password);
 // Fill confirm password (second password field)
 await formPage.locator('input[type="password"]').nth(1).fill(tenant.confirmPassword);
 await formPage.getByRole('button', { name: 'Create' }).click();
-await formPage.waitForTimeout(10000);
+await formPage.waitForTimeout(50000);
 
 await formPage.close();
 
@@ -160,23 +175,14 @@ await formPage.close();
 const managerPage = await page.context().newPage();
 
 // .Wait for network idle so Vue app fully boots before checking DOM
-await managerPage.goto('https://rentgeniux.onrender.com', { 
-  waitUntil: 'networkidle',
-  timeout: 60000 
-});
+   const loginPage1 = new LoginPage(page);
+    await loginPage.login();
 
 // .Wait for Vue to render — check body is not empty first
 await managerPage.waitForFunction(() => document.body.children.length > 0, { timeout: 30000 });
 
 // .Now wait for the input
-await managerPage.waitForSelector('input[name="username"]', { 
-  state: 'visible', 
-  timeout: 30000 
-});
 
-await managerPage.locator('input[name="username"]').fill('manager');
-await managerPage.locator('input[name="password"]').fill('Manager@123');
-await managerPage.getByRole('button', { name: 'Login' }).click();
 
 // .Wait for dashboard on managerPage
 await managerPage.waitForURL('**/manager', { timeout: 60000 });
@@ -213,8 +219,28 @@ tomorrow.setDate(tomorrow.getDate() + 1);
 const tomorrowDay = tomorrow.getDate().toString();
 
 
-0// .1. Click Agreement Date field
 await managerPage.locator('[data-field-name="agreement_date"]').click();
+await managerPage.waitForTimeout(500);
+
+// .Click calendar icon
+await managerPage.locator('i.q-icon.material-icons:has-text("event")').first().click();
+await managerPage.waitForTimeout(1000);
+
+// .Click today in calendar
+const todayDay = new Date().getDate().toString();
+
+await managerPage.evaluate((day) => {
+  const cells = document.querySelectorAll('td, .q-date__calendar-item button');
+  for (const cell of cells) {
+    if (cell.textContent.trim() === day) { cell.click(); break; }
+  }
+}, todayDay);
+await managerPage.waitForTimeout(1000);
+
+
+
+// .1. Click Agreement Date field
+/*await managerPage.locator('[data-field-name="agreement_date"]').click();
 await managerPage.waitForTimeout(500);
 
 // .Click calendar icon
@@ -230,7 +256,7 @@ await managerPage.evaluate((day) => {
 }, tomorrowDay);
 await managerPage.waitForTimeout(1000);
 
-
+*/
 // .1. Click Property Manager Name
 /*await managerPage.locator('div[style*="cursor: pointer"]')
   .filter({ hasText: '[Property Manager Name]' })
@@ -286,7 +312,7 @@ await managerPage.waitForTimeout(300);
 await managerPage.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
 await managerPage.waitForTimeout(1000);
 
-// .5. Click Start Date field
+/*// .5. Click Start Date field
 await managerPage.locator('[data-field-name="start_date"]').click();
 await managerPage.waitForTimeout(500);
 
@@ -300,7 +326,38 @@ await managerPage.evaluate((day) => {
   for (const cell of cells) {
     if (cell.textContent.trim() === day) { cell.click(); break; }
   }
-}, tomorrowDay);
+}, tomorrowDay);*/
+
+
+// .5. Click Start Date field
+await managerPage.locator('[data-field-name="start_date"]').click();
+await managerPage.waitForTimeout(500);
+
+// .Click calendar icon for Start Date
+await managerPage.locator('i.material-icons:has-text("event")').first().click();
+await managerPage.waitForTimeout(1000);
+
+// .Click today using evaluate
+// Click the "next month" navigation arrow first
+await managerPage.evaluate(() => {
+  // Quasar's date navigation usually has two arrow buttons: prev (first) and next (second)
+  const navButtons = document.querySelectorAll('.q-date__navigation button');
+  // Typically: [0] = prev month, last = next month (adjust if your markup differs)
+  const nextBtn = navButtons[navButtons.length - 1];
+  if (nextBtn) nextBtn.click();
+});
+await managerPage.waitForTimeout(500); // let the calendar re-render
+
+// Now select "1" (first day) of the new month
+await managerPage.evaluate(() => {
+  const cells = document.querySelectorAll('td, .q-date__calendar-item button');
+  for (const cell of cells) {
+    if (cell.textContent.trim() === '1') {
+      cell.click();
+      break;
+    }
+  }
+});
 await managerPage.waitForTimeout(1000);
 
 
@@ -395,7 +452,9 @@ console.log('.Logout confirmed!');
 
  await managerPage.locator('input[name="username"]').fill(tenant.username);
   await managerPage.locator('input[name="password"]').fill(tenant.password);
-  await managerPage.getByRole('button', { name: 'Login' }).click();
+  
+await managerPage.getByRole('button', { name: 'Sign in to your account' }).click();
+ 
 
   await managerPage.waitForTimeout(20000);
 
@@ -434,14 +493,12 @@ await managerPage.locator('i.material-icons').filter({ hasText: 'event' }).click
 const today = new Date();
 const day = today.getDate().toString();
 
-// Use exact match instead of substring match
-// Click today's date in the Quasar date picker
 await managerPage.evaluate((day) => {
   const cells = document.querySelectorAll('td, .q-date__calendar-item button');
   for (const cell of cells) {
     if (cell.textContent.trim() === day) { cell.click(); break; }
   }
-}, tomorrowDay);
+}, day);
 await managerPage.waitForTimeout(1000);
 
 // Confirm selection
@@ -459,12 +516,12 @@ await managerPage.locator('.q-card').getByRole('button', { name: 'OK' }).click()
 // Wait for loader to disappear
 await managerPage.locator('.custom-loader-container').waitFor({ state: 'hidden', timeout: 10000 });
 
-await managerPage.locator('input[name="username"]').fill('manager');
-await managerPage.locator('input[name="password"]').fill('inesh@123');
+await managerPage.locator('input[name="username"]').fill('Mahi');
+await managerPage.locator('input[name="password"]').fill('Mahi@123');
 
 // Wait for loader again before clicking
 await managerPage.locator('.custom-loader-container').waitFor({ state: 'hidden', timeout: 10000 });
-await managerPage.getByRole('button', { name: 'Login' }).click();
+await managerPage.getByRole('button', { name: 'Sign in to your account' }).click();
 // .Wait for dashboard on managerPage
 
 // .All subsequent actions on managerPage
@@ -497,7 +554,6 @@ await managerPage.keyboard.press('End');
 await managerPage.waitForTimeout(2000);
 
 // Or use mouse wheel to scroll down
-await managerPage.mouse.wheel(0, 7100);
 await managerPage.waitForTimeout(2000);
 
 
@@ -525,7 +581,7 @@ await managerPage.locator('.q-date__calendar-item--in button').filter({ hasText:
 // Click Upload Lease
 await managerPage.locator('span.block', { hasText: 'Activate Lease' }).click();
 
-await managerPage.waitForTimeout(2000);
+await managerPage.waitForTimeout(20000);
   }
 }
 

@@ -12,242 +12,215 @@
 # Error details
 
 ```
-Error: Registration link not found
-```
+Error: locator.scrollIntoViewIfNeeded: Target page, context or browser has been closed
+Call log:
+  - waiting for getByRole('button', { name: 'Set Up Lease Document' })
 
-# Page snapshot
-
-```yaml
-- generic [active] [ref=e1]:
-  - generic [ref=e6]:
-    - generic [ref=e7]:
-      - heading "RENTGENIUX" [level=3] [ref=e8]
-      - list [ref=e9]:
-        - listitem [ref=e10]:
-          - img [ref=e11]
-          - text: Transparent financial reporting.
-        - listitem [ref=e13]:
-          - img [ref=e14]
-          - text: Unified in-app communication.
-        - listitem [ref=e16]:
-          - img [ref=e17]
-          - text: Secure role based access.
-      - img "City Image" [ref=e19]:
-        - img [ref=e22]
-    - img "Tree Image":
-      - generic:
-        - img
-    - generic [ref=e23]:
-      - img "Login Image" [ref=e24]:
-        - img [ref=e27]
-      - heading "Sign In" [level=5] [ref=e28]
-      - paragraph [ref=e29]: Welcome to RentGENIUX, Please enter your login details.
-      - generic [ref=e30]:
-        - generic [ref=e31]:
-          - text: Username
-          - textbox [ref=e36]
-        - generic [ref=e38]:
-          - text: Password
-          - generic [ref=e41]:
-            - textbox [ref=e43]
-            - img [ref=e45] [cursor=pointer]
-        - button "Forgot Password?" [ref=e51] [cursor=pointer]:
-          - generic [ref=e52]: Forgot Password?
-        - button "Login" [ref=e53] [cursor=pointer]:
-          - generic [ref=e54]: Login
-        - paragraph [ref=e55]: Contact us to get started with RentGeniux Contact Us
-  - alert [ref=e56]:
-    - generic [ref=e58]:
-      - img [ref=e59]: check_circle
-      - generic [ref=e60]: You have been logged out successfully
 ```
 
 # Test source
 
 ```ts
-  1   | class TenantOnboardingPage {
-  2   |   constructor(page) {
-  3   |     this.page = page;
-  4   |   }
-  5   | 
-  6   |   async addTenant(tenant) {  
-  7   |   const page = this.page;   // .ADD THIS LINE
-  8   |    // 1. Open application
-  9   |   await page.goto('https://rentgeniux.onrender.com');
-  10  | 
-  11  |   // 2. Login 
-  12  |   await page.locator('input[name="username"]').fill('manager');
-  13  |   await page.locator('input[name="password"]').fill('Manager@123');
-  14  |   await page.getByRole('button', { name: 'Login' }).click();
-  15  | 
-  16  |   // 3. Wait for dashboard
-  17  |   await page.waitForURL('**/manager');
-  18  | 
-  19  |   // 4. Click Tenants sidebar
-  20  | await page.locator('.lucide-chevron-down').nth(2).click();
-  21  | 
-  22  |   await page.getByRole('button', { name: 'Manage Tenant' }).click();
-  23  | 
-  24  |   await page.waitForTimeout(2000);
-  25  | 
-  26  |   await page.getByText('Onboard Tenant').click();
-  27  | 
-  28  |   await page.locator('.property-card-content').first().click();
-  29  |    await page.waitForTimeout(2000);
-  30  | 
-  31  |    await page.getByRole('button', { name: 'Assign Property' }).nth(0).click();
-  32  |    await page.waitForTimeout(2000);
-  33  | 
-  34  | // Fill First Name
-  35  | await page.locator('input[placeholder="First Name"]').first().fill(tenant.firstName);
-  36  | 
-  37  | // Fill Last Name
-  38  | await page.locator('input[placeholder="Last Name"]').first().fill(tenant.lastName);
-  39  | 
-  40  | // Fill Email
-  41  | await page.locator('input[placeholder="Email"]').first().fill(tenant.email);
-  42  | 
-  43  | // Fill Phone Number
-  44  | await page.locator('input[placeholder="+1 555 111 6985"]').first().fill(tenant.phone);
-  45  | 
-  46  | await page.waitForTimeout(1000);
-  47  | 
-  48  | // Click Submit button
-  49  | await page.locator('button.submit-btn').first().click();
-  50  | await page.waitForTimeout(30000);
-  51  | 
-  52  | 
-  53  | // Open the profile menu/dropdown first
-  54  | 
-  55  |   // Step 8: Click "Logout" menu item to open confirmation dialog
-  56  |    await page.locator('.q-avatar__content').click();
-  57  |     await page.waitForTimeout(500);
-  58  | 
-  59  |     // Click the profile item (first item in dropdown, name-agnostic)
-  60  |    
-  61  |     // Step 8: Click "Logout" menu item to open confirmation dialog
-  62  |     await page.locator('.q-item', { hasText: 'Logout' }).click();
-  63  | 
-  64  |     // Step 9: Wait for confirmation dialog and click the actual Logout button
-  65  |     await page.waitForSelector('.logout-card');
-  66  |     await Promise.all([
-  67  |       page.waitForURL('**/#/login**', { timeout: 60000 }),
-  68  |       page.locator('.logout-card .btn-logout').click(),
-  69  |     ]);
-  70  | 
-  71  |   
-  72  | 
-  73  | // One-time setup: login manually, then save storage state
-  74  | // node script:
-  75  | const { getOnboardingLink } = require('../utils/gmail');
-  76  | 
-  77  | // ... after Submit button click ...
-  78  | await page.waitForTimeout(3000);
-  79  | 
-  80  | const onboardingLink = await getOnboardingLink();
-  81  | console.log('Registration Link:', onboardingLink);
-  82  | 
-  83  | if (!onboardingLink) {
-> 84  |   throw new Error('Registration link not found');
-      |         ^ Error: Registration link not found
-  85  | }
-  86  | 
-  87  | const formPage = await page.context().newPage();
-  88  | await formPage.goto(onboardingLink);
-  89  | await formPage.waitForTimeout(2000);
-  90  | 
-  91  | // Fill emergency contact number
-  92  | await formPage.locator('input[placeholder="e.g., +1 555 111 6985"]').fill(tenant.emergencyContact);
-  93  | 
-  94  | // Fill address
-  95  | // Fill address with "ad" and select first suggestion
-  96  | await formPage.locator('input[placeholder="e.g., 128, Sunshine Tower, Bokes Street"]').fill(tenant.address);
-  97  | 
-  98  | await formPage.waitForTimeout(1000);
-  99  | 
-  100 | // Click first option from dropdown
-  101 | await formPage.locator('.q-menu .q-item, [role="listbox"] >> nth=0').first().click();
-  102 | 
-  103 | 
-  104 | await formPage.waitForSelector('button.add-btn:not([disabled])', { timeout: 10000 });
-  105 | await formPage.locator('button.add-btn').click();
-  106 | 
-  107 | // Upload first file
-  108 | // Document 1 - Address Proof
-  109 | await formPage.locator('input.q-field__native[placeholder="XXX-XX-XXXX"]').click();
-  110 | await formPage.waitForTimeout(500);
-  111 | await formPage.locator('input.q-field__native[placeholder="XXX-XX-XXXX"]').pressSequentially(tenant.ssn, { delay: 150 });
-  112 | await formPage.waitForTimeout(500);
-  113 | console.log('.SSN filled!');
+  111 | await formPage.locator('input[placeholder="e.g., 128, Sunshine Tower, Bokes Street"]').fill(tenant.address);
+  112 | 
+  113 | await formPage.waitForTimeout(1000);
   114 | 
-  115 | // .Document 1 - Address Proof
-  116 | await formPage.locator('div').filter({ hasText: /^Address Proof/ })
-  117 |   .locator('input[type="file"]').setInputFiles(tenant.document1);
-  118 | await formPage.waitForTimeout(1000);
-  119 | console.log('.Address Proof uploaded!');
-  120 | 
-  121 | // .Document 2 - ID Proof
-  122 | await formPage.locator('div').filter({ hasText: /^ID Proof/ })
-  123 |   .locator('input[type="file"]').setInputFiles(tenant.document1);
-  124 | await formPage.waitForTimeout(1000);
-  125 | console.log('.ID Proof uploaded!');
-  126 | 
-  127 | // .Document 3 - Tax Report
-  128 | await formPage.locator('div').filter({ hasText: /^Proof Of Tax ID\/SSN/ })
-  129 |   .locator('input[type="file"]').setInputFiles(tenant.document1);
-  130 | await formPage.waitForTimeout(1000);
-  131 | console.log('.Tax Report uploaded!');
-  132 | 
-  133 | // .Document 4 - Credit Report
-  134 | await formPage.locator('div').filter({ hasText: /^Credit Report/ })
-  135 |   .locator('input[type="file"]').setInputFiles(tenant.document1);
-  136 | await formPage.waitForTimeout(1000);
-  137 | console.log('.Credit Report uploaded!');
-  138 | 
-  139 | await formPage.getByRole('button', { name: 'Next' }).click();
-  140 | console.log('.Add button clicked!');
-  141 | await formPage.waitForTimeout(3000);
-  142 | // Fill username
-  143 | await formPage.locator('input[name="username"]').fill(tenant.username);
-  144 | 
-  145 | // Fill password
-  146 | await formPage.locator('input[name="password"]').fill(tenant.password);
+  115 | // Click first option from dropdown
+  116 | await formPage.locator('.q-menu .q-item, [role="listbox"] >> nth=0').first().click();
+  117 | 
+  118 | 
+  119 | await formPage.waitForSelector('button.add-btn:not([disabled])', { timeout: 10000 });
+  120 | await formPage.locator('button.add-btn').click();
+  121 | 
+  122 | // Upload first file
+  123 | // Document 1 - Address Proof
+  124 | await formPage.locator('input.q-field__native[placeholder="XXX-XX-XXXX"]').click();
+  125 | await formPage.waitForTimeout(500);
+  126 | await formPage.locator('input.q-field__native[placeholder="XXX-XX-XXXX"]').pressSequentially(tenant.ssn, { delay: 150 });
+  127 | await formPage.waitForTimeout(500);
+  128 | console.log('.SSN filled!');
+  129 | 
+  130 | // .Document 1 - Address Proof
+  131 | await formPage.locator('div').filter({ hasText: /^Address Proof/ })
+  132 |   .locator('input[type="file"]').setInputFiles(tenant.document1);
+  133 | await formPage.waitForTimeout(1000);
+  134 | console.log('.Address Proof uploaded!');
+  135 | 
+  136 | // .Document 2 - ID Proof
+  137 | await formPage.locator('div').filter({ hasText: /^ID Proof/ })
+  138 |   .locator('input[type="file"]').setInputFiles(tenant.document1);
+  139 | await formPage.waitForTimeout(1000);
+  140 | console.log('.ID Proof uploaded!');
+  141 | 
+  142 | // .Document 3 - Tax Report
+  143 | await formPage.locator('div').filter({ hasText: /^Proof Of Tax ID\/SSN/ })
+  144 |   .locator('input[type="file"]').setInputFiles(tenant.document1);
+  145 | await formPage.waitForTimeout(1000);
+  146 | console.log('.Tax Report uploaded!');
   147 | 
-  148 | // Fill confirm password
-  149 | // Fill confirm password (second password field)
-  150 | await formPage.locator('input[type="password"]').nth(1).fill(tenant.confirmPassword);
-  151 | await formPage.getByRole('button', { name: 'Create' }).click();
-  152 | await formPage.waitForTimeout(10000);
+  148 | // .Document 4 - Credit Report
+  149 | await formPage.locator('div').filter({ hasText: /^Credit Report/ })
+  150 |   .locator('input[type="file"]').setInputFiles(tenant.document1);
+  151 | await formPage.waitForTimeout(1000);
+  152 | console.log('.Credit Report uploaded!');
   153 | 
-  154 | await formPage.close();
-  155 | 
-  156 | // ─── Re-login as Manager ───────────────────────────────────────────────────
-  157 | // ─── Re-login as Manager ───────────────────────────────────────────────────
-  158 | // Open in a new page
-  159 | // ─── Re-login as Manager ───────────────────────────────────────────────────
-  160 | const managerPage = await page.context().newPage();
-  161 | 
-  162 | // .Wait for network idle so Vue app fully boots before checking DOM
-  163 | await managerPage.goto('https://rentgeniux.onrender.com', { 
-  164 |   waitUntil: 'networkidle',
-  165 |   timeout: 60000 
-  166 | });
-  167 | 
-  168 | // .Wait for Vue to render — check body is not empty first
-  169 | await managerPage.waitForFunction(() => document.body.children.length > 0, { timeout: 30000 });
+  154 | await formPage.getByRole('button', { name: 'Next' }).click();
+  155 | console.log('.Add button clicked!');
+  156 | await formPage.waitForTimeout(3000);
+  157 | // Fill username
+  158 | await formPage.locator('input[name="username"]').fill(tenant.username);
+  159 | 
+  160 | // Fill password
+  161 | await formPage.locator('input[name="password"]').fill(tenant.password);
+  162 | 
+  163 | // Fill confirm password
+  164 | // Fill confirm password (second password field)
+  165 | await formPage.locator('input[type="password"]').nth(1).fill(tenant.confirmPassword);
+  166 | await formPage.getByRole('button', { name: 'Create' }).click();
+  167 | await formPage.waitForTimeout(50000);
+  168 | 
+  169 | await formPage.close();
   170 | 
-  171 | // .Now wait for the input
-  172 | await managerPage.waitForSelector('input[name="username"]', { 
-  173 |   state: 'visible', 
-  174 |   timeout: 30000 
-  175 | });
+  171 | // ─── Re-login as Manager ───────────────────────────────────────────────────
+  172 | // ─── Re-login as Manager ───────────────────────────────────────────────────
+  173 | // Open in a new page
+  174 | // ─── Re-login as Manager ───────────────────────────────────────────────────
+  175 | const managerPage = await page.context().newPage();
   176 | 
-  177 | await managerPage.locator('input[name="username"]').fill('manager');
-  178 | await managerPage.locator('input[name="password"]').fill('Manager@123');
-  179 | await managerPage.getByRole('button', { name: 'Login' }).click();
+  177 | // .Wait for network idle so Vue app fully boots before checking DOM
+  178 |    const loginPage1 = new LoginPage(page);
+  179 |     await loginPage.login();
   180 | 
-  181 | // .Wait for dashboard on managerPage
-  182 | await managerPage.waitForURL('**/manager', { timeout: 60000 });
-  183 | await managerPage.waitForTimeout(1000);
-  184 | 
+  181 | // .Wait for Vue to render — check body is not empty first
+  182 | await managerPage.waitForFunction(() => document.body.children.length > 0, { timeout: 30000 });
+  183 | 
+  184 | // .Now wait for the input
+  185 | 
+  186 | 
+  187 | // .Wait for dashboard on managerPage
+  188 | await managerPage.waitForURL('**/manager', { timeout: 60000 });
+  189 | await managerPage.waitForTimeout(1000);
+  190 | 
+  191 | // .All subsequent actions on managerPage
+  192 | await managerPage.locator('.lucide-chevron-down').nth(2).click();
+  193 | 
+  194 | const manageLeaseBtn = managerPage.getByRole('button', { name: 'Manage Lease' });
+  195 | await manageLeaseBtn.waitFor({ state: 'visible', timeout: 10000 });
+  196 | await managerPage.waitForTimeout(400);
+  197 | await manageLeaseBtn.click();
+  198 | 
+  199 | await managerPage.waitForTimeout(2000);
+  200 | 
+  201 | await managerPage.locator('input[placeholder="Search"]').fill(tenant.firstName);
+  202 | await managerPage.waitForTimeout(500);
+  203 | 
+  204 | await managerPage.locator('i.q-icon.material-icons:has-text("chevron_right")').first().click();
+  205 | 
+  206 | // .Wait for button to exist first
+  207 | await managerPage.waitForSelector('button', { timeout: 15000 });
+  208 | 
+  209 | // .Scroll into view and click in one go
+  210 | const setupBtn = managerPage.getByRole('button', { name: 'Set Up Lease Document' });
+> 211 | await setupBtn.scrollIntoViewIfNeeded();
+      |                ^ Error: locator.scrollIntoViewIfNeeded: Target page, context or browser has been closed
+  212 | await setupBtn.waitFor({ state: 'visible', timeout: 10000 });
+  213 | await setupBtn.click();
+  214 | await managerPage.waitForTimeout(2000);
+  215 | 
+  216 | // .Declare ALL dates ONCE at the top
+  217 | const tomorrow = new Date();
+  218 | tomorrow.setDate(tomorrow.getDate() + 1);
+  219 | const tomorrowDay = tomorrow.getDate().toString();
+  220 | 
+  221 | 
+  222 | await managerPage.locator('[data-field-name="agreement_date"]').click();
+  223 | await managerPage.waitForTimeout(500);
+  224 | 
+  225 | // .Click calendar icon
+  226 | await managerPage.locator('i.q-icon.material-icons:has-text("event")').first().click();
+  227 | await managerPage.waitForTimeout(1000);
+  228 | 
+  229 | // .Click today in calendar
+  230 | const todayDay = new Date().getDate().toString();
+  231 | 
+  232 | await managerPage.evaluate((day) => {
+  233 |   const cells = document.querySelectorAll('td, .q-date__calendar-item button');
+  234 |   for (const cell of cells) {
+  235 |     if (cell.textContent.trim() === day) { cell.click(); break; }
+  236 |   }
+  237 | }, todayDay);
+  238 | await managerPage.waitForTimeout(1000);
+  239 | 
+  240 | 
+  241 | 
+  242 | // .1. Click Agreement Date field
+  243 | /*await managerPage.locator('[data-field-name="agreement_date"]').click();
+  244 | await managerPage.waitForTimeout(500);
+  245 | 
+  246 | // .Click calendar icon
+  247 | await managerPage.locator('i.q-icon.material-icons:has-text("event")').first().click();
+  248 | await managerPage.waitForTimeout(1000);
+  249 | 
+  250 | // .Click tomorrow in calendar
+  251 | await managerPage.evaluate((day) => {
+  252 |   const cells = document.querySelectorAll('td, .q-date__calendar-item button');
+  253 |   for (const cell of cells) {
+  254 |     if (cell.textContent.trim() === day) { cell.click(); break; }
+  255 |   }
+  256 | }, tomorrowDay);
+  257 | await managerPage.waitForTimeout(1000);
+  258 | 
+  259 | */
+  260 | // .1. Click Property Manager Name
+  261 | /*await managerPage.locator('div[style*="cursor: pointer"]')
+  262 |   .filter({ hasText: '[Property Manager Name]' })
+  263 |   .click();
+  264 | await managerPage.waitForTimeout(500);
+  265 | let inputs = managerPage.locator('input[aria-label="Enter Value"]');
+  266 | let count = await inputs.count();
+  267 | await inputs.nth(count - 1).fill('Jaya Sudharsan');
+  268 | // .Double click to confirm and remove validation error
+  269 | await inputs.nth(count - 1).dblclick();
+  270 | await managerPage.waitForTimeout(500);
+  271 | 
+  272 | // .Click outside
+  273 | await managerPage.mouse.click(700, 400);
+  274 | await managerPage.waitForTimeout(300);
+  275 | 
+  276 | 
+  277 | // .2. Click Company Type
+  278 | await managerPage.locator('div[style*="cursor: pointer"]')
+  279 |   .filter({ hasText: '[Company Type]' })
+  280 |   .click();
+  281 | await managerPage.waitForTimeout(500);
+  282 | inputs = managerPage.locator('input[aria-label="Enter Value"]');
+  283 | count = await inputs.count();
+  284 | await inputs.nth(count - 1).fill('Property Management');
+  285 | // .Double click to confirm
+  286 | await inputs.nth(count - 1).dblclick();
+  287 | await managerPage.waitForTimeout(500);
+  288 | 
+  289 | // .Click outside
+  290 | await managerPage.mouse.click(700, 400);
+  291 | await managerPage.waitForTimeout(300);
+  292 | 
+  293 | // .3. Click Property Manager Address
+  294 | await managerPage.locator('div[style*="cursor: pointer"]')
+  295 |   .filter({ hasText: '[Property Manager Address]' })
+  296 |   .click();
+  297 | await managerPage.waitForTimeout(500);
+  298 | inputs = managerPage.locator('input[aria-label="Enter Value"]');
+  299 | count = await inputs.count();
+  300 | await inputs.nth(count - 1).fill('205 Sunset Street, Denver, 80201');
+  301 | // .Double click to confirm
+  302 | await inputs.nth(count - 1).dblclick();
+  303 | await managerPage.waitForTimeout(500);
+  304 | 
+  305 | // .Click outside
+  306 | await managerPage.mouse.click(700, 400);
+  307 | await managerPage.waitForTimeout(300);
+  308 | 
+  309 | */
+  310 | 
+  311 | // .Scroll down to find date fields
 ```

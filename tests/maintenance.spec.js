@@ -1,5 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { LoginPage } = require('../Pages/Manager_Login');
+
 
 test.setTimeout(200000); // ✅ Increase to 180 seconds
 
@@ -8,14 +10,9 @@ const maintenance = maintenanceData[0];
 
 test('Manager → Maintenance → Create Request Flow', async ({ page }) => {
 
-  // 1. Open application
-  await page.goto('https://rentgeniux.onrender.com');
- 
-  // 2. Login
-  await page.locator('input[name="username"]').fill('manager');
-  await page.locator('input[name="password"]').fill('Manager@123');
-  await page.getByRole('button', { name: 'Login' }).click();
 
+     const loginPage = new LoginPage(page);
+    await loginPage.login();
   // 3. Wait for dashboard
   await page.waitForURL('**/manager');
 
@@ -43,7 +40,8 @@ test('Manager → Maintenance → Create Request Flow', async ({ page }) => {
 
   // 10. Select Category dropdown
   await page.locator('i.q-select__dropdown-icon').nth(1).click();
-  await page.getByRole('option', { name: maintenance.category }).click(); // ✅ Using test data
+
+await page.getByRole('option', { name: maintenance.category, exact: true }).click(); // ✅ Using test data
 
   await page.waitForTimeout(2000);
 
@@ -133,12 +131,14 @@ await page.waitForTimeout(3000);
 // Force click the Assign button even if disabled
 await page.locator('.q-dialog button.bg-green').click({ force: true });
 
-await page.waitForTimeout(7000);
+await page.waitForTimeout(1000);
 
 // Click Assign button
 await page.locator('i.q-select__dropdown-icon').first().click();
-await page.waitForTimeout(2000);
+await page.waitForTimeout(5000);
 
+// Open the dropdown
+await page.locator('.q-select__dropdown-icon').click();
 await page.getByRole('option', { name: 'In Progress' }).click();
 await page.waitForTimeout(2000);
 
@@ -195,7 +195,7 @@ console.log('Tomorrow date:', tomorrowDate1);
 // ✅ If tomorrow is in next month, click next arrow
 if (tomorrowMonth !== currentMonth) {
   await page.locator('.q-date__arrow').nth(1).click(); // click ">" next month
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(5000);
   console.log('✅ Navigated to next month!');
 }
 
@@ -209,7 +209,7 @@ await page.waitForTimeout(3000);
 
 await page.getByRole('button', { name: 'Generate Invoice' }).click();
 
-await page.waitForTimeout(2000);
+await page.waitForTimeout(20000);
 
 await page.getByRole('button', { name: 'Issue Invoice' }).click();
 

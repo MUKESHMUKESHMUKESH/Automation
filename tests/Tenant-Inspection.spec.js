@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
-test.setTimeout(700000); // ✅ Increase to 180 seconds
+const { LoginPage } = require('../Pages/Manager_Login');
+test.setTimeout(700000); // . Increase to 180 seconds
 const { loginAsManager } = require('../utils/login');
 const { getOnboardingLink } = require('../utils/gmail');
 const tenantData = require('../testdata/tenantdata');
@@ -7,14 +8,8 @@ const tenant = tenantData[2];
   
 test('Manager → Tenant Inspection Flow', async ({ page }) => {
 
-  
-  // 1. Open application
-  await page.goto('https://rentgeniux.onrender.com/#/login');
-
-  // 2. Login 
-  await page.locator('input[name="username"]').fill('manager');
-  await page.locator('input[name="password"]').fill('Manager@123');
-  await page.getByRole('button', { name: 'Login' }).click();
+    const loginPage = new LoginPage(page);
+    await loginPage.login();
 
   // 3. Wait for dashboard
 
@@ -26,49 +21,49 @@ test('Manager → Tenant Inspection Flow', async ({ page }) => {
 
     await page.getByRole('button', { name: 'Request Inspection' }).click();
     await page.waitForTimeout(1000);
-    console.log('✅ Request Inspection clicked!');
+    console.log('. Request Inspection clicked!');
     await page.waitForTimeout(2000);
 
-    // ✅ Click and type in Select a Tenant field
-        await page.locator('input[placeholder="Select a Tenant"]').fill('Daniel');
+    // . Click and type in Select a Tenant field
+        await page.locator('input[placeholder="Select a Tenant"]').nth(0).click;
 
         await page.waitForTimeout(1000);
 
-        // ✅ Select first option
+        // . Select first option
         await page.locator('[role="option"]').first().click({ force: true });
         await page.waitForTimeout(2000);
-        console.log('✅ Tenant selected!');
+        console.log('. Tenant selected!');
 
         await page.locator('input[placeholder="Enter inspector name"]').fill('Jhony');
         await page.waitForTimeout(2000);
-        console.log('✅ Inspector Name filled!');
+        console.log('. Inspector Name filled!');
 
 
-        // ✅ Click calendar icon
+        // . Click calendar icon
           await page.locator('i.material-icons:has-text("event")').click();
           await page.waitForSelector('.q-date__calendar-item', { state: 'visible' });
           await page.waitForTimeout(500);
 
-            // ✅ Get today's date
+            // . Get today's date
           const today = new Date();
           const todayDay = today.getDate().toString();
 
-          // ✅ Get last day of current month
+          // . Get last day of current month
           const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate().toString();
 
-          // ✅ Check if today is last day of month
+          // . Check if today is last day of month
           if (todayDay === lastDay) {
             // Click chevron_right to go to next month
             await page.locator('i.material-icons:has-text("chevron_right")').first().click();
             await page.waitForTimeout(500);
-            console.log('✅ Navigated to next month!');
+            console.log('. Navigated to next month!');
 
             // Select first date of next month
             await page.locator('.q-date__calendar-item button')
               .filter({ hasText: /^1$/ })
               .click();
             await page.waitForTimeout(500);
-            console.log('✅ First date of next month selected!');
+            console.log('. First date of next month selected!');
 
 } else {
   // Select today's date
@@ -76,105 +71,317 @@ test('Manager → Tenant Inspection Flow', async ({ page }) => {
     .filter({ hasText: new RegExp(`^${todayDay}$`) })
     .click();
   await page.waitForTimeout(500);
-  console.log('✅ Today date selected!');
+  console.log('. Today date selected!');
 }  
 
-         // ✅ Click Request Inspection inside dialog
+         // . Click Request Inspection inside dialog
 await page.locator('#q-portal--dialog--1').getByRole('button', { name: 'Request Inspection' }).click();
 await page.waitForTimeout(5000);
-console.log('✅ Request Inspection clicked!');
+console.log('. Request Inspection clicked!');
 
 await page.getByRole('button', { name: 'Back to Inspections' }).click();
 
+ await page.locator('.q-item', { hasText: 'Logout' }).click();
+
+    // Step 9: Wait for confirmation dialog and click the actual Logout button
+    await page.waitForSelector('.logout-card');
+    await Promise.all([
+    
+      //page.locator('.logout-card .btn-logout').click(),]);
 
 
+/*
   const { getInspectionAcceptLink } = require('../utils/gmail');
 
-// ✅ After Request Inspection submitted
+// . After Request Inspection submitted
         const acceptLink = await getInspectionAcceptLink();
-        console.log('✅ Accept Link:', acceptLink);
+        console.log('. Accept Link:', acceptLink);
 
-        // ✅ Open Accept link
+        // . Open Accept link
         await page.goto(acceptLink);
         await page.waitForTimeout(2000);
-        console.log('✅ Inspection Accepted!');
-    await managerPage.locator('.q-item.text-negative:has(i.material-icons:text("logout"))').click();
-    await page.waitForTimeout(2000);
+        console.log('. Inspection Accepted!');
+  */ 
     const Inspection_page = await page.context().newPage();
 
 
    
-await page.goto('https://rentgeniux.onrender.com/#/login');
+await Inspection_page.goto('https://rentgeniux.onrender.com/#/login');
+  await Inspection_page.locator('input[name="username"]').fill('francise');
+  await Inspection_page.locator('input[name="password"]').fill('Francise@123');
+  await Inspection_page.getByRole('button', { name: 'Login' }).click();
 // 4. Click Tenants sidebar
 await Inspection_page.locator('.lucide-chevron-down').nth(2).click();
 await Inspection_page.getByRole('button', { name: 'Inspection' }).click();
 
-await Inspection_page.locator('div.inspection-card').first()
+/*await Inspection_page.locator('div.inspection-card').first()
   .locator('button.inspection-btn.active-btn')
   .click();
 await Inspection_page.waitForTimeout(1000);
-console.log('✅ Start Inspection clicked!');
+console.log('. Start Inspection clicked!');*/
 
-// ✅ Click Setup Signature
+// . Click Setup Signature
 await Inspection_page.locator('button.mic-sig-setup-btn').nth(0).click();
 await Inspection_page.waitForTimeout(1000);
-console.log('✅ Setup Signature clicked!');
+console.log('. Setup Signature clicked!');
 
-// ✅ Wait for signature card
+// . Wait for signature card
 await Inspection_page.waitForSelector('.tenant-sign-card', { state: 'visible' });
 await Inspection_page.waitForTimeout(500);
 
-// ✅ Click Type tab
+// . Click Type tab
 await Inspection_page.locator('.tenant-tab-link').filter({ hasText: 'Type' }).click();
 await Inspection_page.waitForTimeout(500);
-console.log('✅ Type tab clicked!');
+console.log('. Type tab clicked!');
 
-// ✅ Fill First Name
+// . Fill First Name
 await Inspection_page.locator('input[placeholder="Enter first name"]').fill('harini');
 await Inspection_page.waitForTimeout(500);
-console.log('✅ First Name filled!');
+console.log('. First Name filled!');
 
-// ✅ Fill Last Name
+// . Fill Last Name
 await Inspection_page.locator('input[placeholder="Enter last name"]').fill('N');
 await Inspection_page.waitForTimeout(500);
-console.log('✅ Last Name filled!');
+console.log('. Last Name filled!');
 
-// ✅ Wait for Submit button to be enabled
+// . Wait for Submit button to be enabled
 await expect(Inspection_page.locator('button.tenant-submit-btn')).toBeEnabled({ timeout: 10000 });
 await Inspection_page.waitForTimeout(500);
 
-// ✅ Click Submit
+// . Click Submit
 await Inspection_page.locator('button.tenant-submit-btn').click();
 await Inspection_page.waitForTimeout(2000);
-console.log('✅ Signature Submitted!');
+console.log('. Signature Submitted!');
 
-// ✅ Wait for dialog to open
-await Inspection_page.waitForSelector('.mic-dialog-card', { state: 'visible' });
+// . Wait for dialog to open
+
+
+
+
+// . Click Setup Signature
+await Inspection_page
+  .locator('div', { hasText: 'Tenant Signature' })
+  .locator('button.mic-sig-setup-btn')
+  .last()
+  .click();
+console.log('. Setup Signature clicked!');
+
+// . Wait for signature card
+
+
+// . Click Type tab
+await Inspection_page.locator('.tenant-tab-link').filter({ hasText: 'Type' }).click();
 await Inspection_page.waitForTimeout(500);
-console.log('✅ Add Condition dialog opened!');
+console.log('. Type tab clicked!');
 
-// ✅ Fill Household Items
+// . Fill First Name
+await Inspection_page.locator('input[placeholder="Enter first name"]').fill('harini');
+await Inspection_page.waitForTimeout(500);
+console.log('. First Name filled!');
+
+// . Fill Last Name
+await Inspection_page.locator('input[placeholder="Enter last name"]').fill('N');
+await Inspection_page.waitForTimeout(500);
+console.log('. Last Name filled!');
+
+// . Wait for Submit button to be enabled
+await expect(Inspection_page.locator('button.tenant-submit-btn')).toBeEnabled({ timeout: 10000 });
+await Inspection_page.waitForTimeout(500);
+
+// . Click Submit
+await Inspection_page.locator('button.tenant-submit-btn').click();
+await Inspection_page.waitForTimeout(2000);
+console.log('. Signature Submitted!');
+
+
+ await Inspection_page.locator('button.mic-add-cond-btn', { hasText: 'Add Condition' }).nth(0).click();
+await Inspection_page.waitForTimeout(500);
+console.log('. Add Condition dialog opened!');
+
+// . Fill Household Items
 await Inspection_page.locator('input.mic-input').fill('Sofa');
 await Inspection_page.waitForTimeout(500);
-console.log('✅ Household Items filled!');
+console.log('. Household Items filled!');
 
-// ✅ Select Good condition radio button
+// . Select Good condition radio button
 await Inspection_page.locator('input.mic-radio[value="Good"]').click({ force: true });
 await Inspection_page.waitForTimeout(500);
-console.log('✅ Good condition selected!');
+console.log('. Good condition selected!');
 
-// ✅ Fill Note
+// . Fill Note
 await Inspection_page.locator('textarea.mic-textarea').fill('Sofa');
 await Inspection_page.waitForTimeout(500);
-console.log('✅ Note filled!');
+console.log('. Note filled!');
 
-// ✅ Upload Image
+// . Upload Image
 await Inspection_page.locator('div.mic-upload-zone input[type="file"]').setInputFiles('./tests/files/property2.jpg');
 await Inspection_page.waitForTimeout(1000);
-console.log('✅ Image uploaded!');
+console.log('. Image uploaded!');
 
-// ✅ Click Add Condition button
+// . Click Add Condition button
 await Inspection_page.locator('button.mic-add-btn').click();
 await Inspection_page.waitForTimeout(1000);
-console.log('✅ Add Condition submitted!');
+console.log('. Add Condition submitted!');
+
+
+//kitchen
+
+ await Inspection_page.locator('button.mic-add-cond-btn', { hasText: 'Add Condition' }).nth(1).click();
+await Inspection_page.waitForTimeout(500);
+console.log('. Add Condition dialog opened!');
+
+// . Fill Kitchen
+await Inspection_page.locator('input.mic-input').fill('Refrigerator');
+await Inspection_page.waitForTimeout(500);
+console.log('. Household Items filled!');
+
+// . Select Good condition radio button
+await Inspection_page.locator('input.mic-radio[value="Good"]').click({ force: true });
+await Inspection_page.waitForTimeout(500);
+console.log('. Good condition selected!');
+
+// . Fill Note
+await Inspection_page.locator('textarea.mic-textarea').fill('The refrigerator is in good working condition with no visible damage or stains');
+await Inspection_page.waitForTimeout(500);
+console.log('. Note filled!');
+
+// . Upload Image
+await Inspection_page.locator('div.mic-upload-zone input[type="file"]').setInputFiles('./tests/files/property2.jpg');
+await Inspection_page.waitForTimeout(1000);
+console.log('. Image uploaded!');
+
+// . Click Add Condition button
+await Inspection_page.locator('button.mic-add-btn').click();
+await Inspection_page.waitForTimeout(1000);
+console.log('. Add Condition submitted!');
+
+
+//Bedroom
+
+ await Inspection_page.locator('button.mic-add-cond-btn', { hasText: 'Add Condition' }).nth(2).click();
+await Inspection_page.waitForTimeout(500);
+console.log('. Add Condition dialog opened!');
+
+// . Fill Kitchen
+await Inspection_page.locator('input.mic-input').fill('The bed frame and mattress are in good condition with no visible damage, stains, or wear.');
+await Inspection_page.waitForTimeout(500);
+console.log('. Household Items filled!');
+
+// . Select Good condition radio button
+await Inspection_page.locator('input.mic-radio[value="Good"]').click({ force: true });
+await Inspection_page.waitForTimeout(500);
+console.log('. Good condition selected!');
+
+// . Fill Note
+await Inspection_page.locator('textarea.mic-textarea').fill('Bed');
+await Inspection_page.waitForTimeout(500);
+console.log('. Note filled!');
+
+// . Upload Image
+await Inspection_page.locator('div.mic-upload-zone input[type="file"]').setInputFiles('./tests/files/property2.jpg');
+await Inspection_page.waitForTimeout(1000);
+console.log('. Image uploaded!');
+
+// . Click Add Condition button
+await Inspection_page.locator('button.mic-add-btn').click();
+await Inspection_page.waitForTimeout(1000);
+console.log('. Add Condition submitted!');
+
+//Bathroom
+
+ await Inspection_page.locator('button.mic-add-cond-btn', { hasText: 'Add Condition' }).nth(3).click();
+await Inspection_page.waitForTimeout(500);
+console.log('. Add Condition dialog opened!');
+
+// . Fill Bathroom
+await Inspection_page.locator('input.mic-input').fill('Bathroom Glass');
+await Inspection_page.waitForTimeout(500);
+console.log('. Household Items filled!');
+
+// . Select Good condition radio button
+await Inspection_page.locator('input.mic-radio[value="Good"]').click({ force: true });
+await Inspection_page.waitForTimeout(500);
+console.log('. Good condition selected!');
+
+// . Fill Note
+await Inspection_page.locator('textarea.mic-textarea').fill('The bathroom glass (mirror/shower glass) is clean, intact, and free from cracks or scratches');
+await Inspection_page.waitForTimeout(500);
+console.log('. Note filled!');
+
+// . Upload Image
+await Inspection_page.locator('div.mic-upload-zone input[type="file"]').setInputFiles('./tests/files/property2.jpg');
+await Inspection_page.waitForTimeout(1000);
+console.log('. Image uploaded!');
+
+// . Click Add Condition button
+await Inspection_page.locator('button.mic-add-btn').click();
+await Inspection_page.waitForTimeout(1000);
+console.log('. Add Condition submitted!');
+
+// . 
+
+ await Inspection_page.locator('button.mic-add-cond-btn', { hasText: 'Add Condition' }).nth(4).click();
+await Inspection_page.waitForTimeout(500);
+console.log('. Add Condition dialog opened!');
+await Inspection_page.locator('input.mic-input').fill('Bathroom Glass');
+await Inspection_page.waitForTimeout(500);
+console.log('. Household Items filled!');
+
+// . Select Good condition radio button
+await Inspection_page.locator('input.mic-radio[value="Good"]').click({ force: true });
+await Inspection_page.waitForTimeout(500);
+console.log('. Good condition selected!');
+
+// . Fill Note
+await Inspection_page.locator('textarea.mic-textarea').fill('The bathroom glass (mirror/shower glass) is clean, intact, and free from cracks or scratches');
+await Inspection_page.waitForTimeout(500);
+console.log('. Note filled!');
+
+// . Upload Image
+await Inspection_page.locator('div.mic-upload-zone input[type="file"]').setInputFiles('./tests/files/property2.jpg');
+await Inspection_page.waitForTimeout(1000);
+console.log('. Image uploaded!');
+
+
+
+// . Click Add Condition button
+await Inspection_page.locator('button.mic-add-btn').click();
+await Inspection_page.waitForTimeout(1000);
+console.log('. Add Condition submitted!');
+
+
+// . Fill Bathroom
+
+ await Inspection_page.locator('button.mic-add-cond-btn', { hasText: 'Add Condition' }).nth(5).click();
+await Inspection_page.waitForTimeout(500);
+await Inspection_page.locator('input.mic-input').fill('Outdoor Swing');
+await Inspection_page.waitForTimeout(500);
+console.log('. Household Items filled!');
+
+// . Select Good condition radio button
+await Inspection_page.locator('input.mic-radio[value="Good"]').click({ force: true });
+await Inspection_page.waitForTimeout(500);
+console.log('. Good condition selected!');
+
+// . Fill Note
+await Inspection_page.locator('textarea.mic-textarea').fill('The outdoor swing is in good condition, sturdy, and free from rust, damage, or loose fittings.');
+await Inspection_page.waitForTimeout(500);
+console.log('. Note filled!');
+
+// . Upload Image
+await Inspection_page.locator('div.mic-upload-zone input[type="file"]').setInputFiles('./tests/files/property2.jpg');
+await Inspection_page.waitForTimeout(1000);
+console.log('. Image uploaded!');
+
+// . Click Add Condition button
+await Inspection_page.locator('button.mic-add-btn').click();
+await Inspection_page.waitForTimeout(1000);
+console.log('. Add Condition submitted!');
+
+await page.locator('.q-checkbox__bg').click({ force: true });
+
+await Inspection_page.getByRole('button', { name: 'Close Move-In Inspection' }).click();
+
+
+
 });

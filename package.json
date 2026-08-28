@@ -12,6 +12,7 @@
     "@types/node": "^25.5.2"
   },
   "dependencies": {
+    "dotenv": "^17.4.2",
     "imap": "^0.8.17",
     "lighthouse": "^12.8.2",
     "mailparser": "^3.9.9",
